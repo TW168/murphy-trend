@@ -540,7 +540,7 @@ def analyze_ticker(ticker: str) -> dict[str, Any]:
     Full Murphy technical analysis. Returns a dict matching AnalysisResponse schema.
     """
     ticker = ticker.upper().strip()
-    df = fetch_stock_data(ticker, period="1y")
+    df = fetch_stock_data(ticker, period="2y")
     info = fetch_ticker_info(ticker)
 
     close = df["Close"]

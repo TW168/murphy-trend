@@ -13,7 +13,7 @@ INDEX_TICKERS = {
 }
 
 
-def fetch_stock_data(ticker: str, period: str = "1y") -> pd.DataFrame:
+def fetch_stock_data(ticker: str, period: str = "2y") -> pd.DataFrame:
     """Fetch OHLCV daily data for a ticker. Raises ValueError on bad ticker."""
     t = yf.Ticker(ticker)
     df = t.history(period=period, auto_adjust=True)
