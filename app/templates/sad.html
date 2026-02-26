@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Architecture — MurphyTrend{% endblock %}
+
+{% block head %}
+<style>
+{{ pygments_css | safe }}
+.codehilite { border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.codehilite pre { margin: 0; font-size: 0.85rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+
+    <!-- TOC sidebar -->
+    <div class="col-lg-3 d-none d-lg-block">
+      <div class="toc-sidebar">
+        <div class="toc-header fw-600 small text-muted text-uppercase mb-3 px-2">
+          <i class="bi bi-list-ul me-1"></i>Contents
+        </div>
+        <nav id="toc-nav" class="toc-nav">
+          <!-- JS-generated from headings -->
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="col-lg-9">
+      <div class="card shadow-sm">
+        <div class="card-body sad-content px-4 px-lg-5 py-4" id="sad-body" data-bs-spy="scroll" data-bs-target="#toc-nav">
+          {{ content_html | safe }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Build TOC from headings
+(function() {
+  const body = document.getElementById('sad-body');
+  const nav = document.getElementById('toc-nav');
+  if (!body || !nav) return;
+
+  const headings = body.querySelectorAll('h1, h2, h3');
+  if (!headings.length) return;
+
+  headings.forEach((h, i) => {
+    if (!h.id) h.id = 'heading-' + i;
+    const level = parseInt(h.tagName[1]);
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    a.className = 'toc-link toc-h' + level;
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById(h.id).scrollIntoView({ behavior: 'smooth' });
+    });
+    nav.appendChild(a);
+  });
+
+  // Scrollspy
+  const links = nav.querySelectorAll('.toc-link');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = nav.querySelector(`a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+
+  headings.forEach(h => observer.observe(h));
+})();
+</script>
+{% endblock %}
