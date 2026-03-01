@@ -1,4 +1,4 @@
-# MurphyTrend
+# Murphy Trend
 
 Stock technical analysis web app based on John J. Murphy's *Technical Analysis of the Financial Markets*. Enter any publicly traded ticker to get a Murphy Outlook (bullish / bearish / neutral), 30/60/90-day price targets, detected chart patterns, and interactive Plotly charts.
 

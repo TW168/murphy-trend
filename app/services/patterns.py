@@ -47,6 +47,20 @@ def _linreg_slope_pct(series: pd.Series) -> float:
     return slope / mean if mean != 0 else 0.0
 
 
+def _fmt(ts) -> str:
+    """Format a pandas Timestamp as ISO date string for Plotly."""
+    return ts.strftime("%Y-%m-%d")
+
+
+def _chart_colors(direction: str) -> tuple[str, str]:
+    """Return (fillcolor, bordercolor) for a given pattern direction."""
+    if direction == "bullish":
+        return "rgba(42,157,143,0.22)", "#2a9d8f"
+    if direction == "bearish":
+        return "rgba(230,57,70,0.22)", "#e63946"
+    return "rgba(244,162,97,0.22)", "#f4a261"
+
+
 # ---------------------------------------------------------------------------
 # Reversal patterns
 # ---------------------------------------------------------------------------
@@ -88,6 +102,7 @@ def _detect_head_and_shoulders(df: pd.DataFrame) -> dict | None:
                         f"Head ${p2:.2f}, shoulders ~${shoulder_avg:.2f}, "
                         f"neckline ${neckline:.2f} — bearish if neckline breaks"
                     )
+                fill, border = _chart_colors("bearish")
                 return {
                     "name": "Head & Shoulders",
                     "value": f"Head ${p2:.2f} / Shoulders ~${shoulder_avg:.2f} / Neckline ${neckline:.2f}",
@@ -95,6 +110,15 @@ def _detect_head_and_shoulders(df: pd.DataFrame) -> dict | None:
                     "direction": "bearish",
                     "score": -1.0 if broke else -0.6,
                     "weight": 1.5,
+                    "chart_data": {
+                        "x0": _fmt(data.index[p_idx[0]]),
+                        "x1": _fmt(data.index[-1]),
+                        "y0": round(neckline * 0.99, 2),
+                        "y1": round(p2 * 1.01, 2),
+                        "label": "Head & Shoulders",
+                        "fill": fill,
+                        "border": border,
+                    },
                 }
 
     # --- Bullish Inverse H&S ---
@@ -121,6 +145,7 @@ def _detect_head_and_shoulders(df: pd.DataFrame) -> dict | None:
                         f"Head ${t2:.2f}, shoulders ~${shoulder_avg:.2f}, "
                         f"neckline ${neckline:.2f} — bullish if neckline clears"
                     )
+                fill, border = _chart_colors("bullish")
                 return {
                     "name": "Inverse Head & Shoulders",
                     "value": f"Head ${t2:.2f} / Shoulders ~${shoulder_avg:.2f} / Neckline ${neckline:.2f}",
@@ -128,6 +153,15 @@ def _detect_head_and_shoulders(df: pd.DataFrame) -> dict | None:
                     "direction": "bullish",
                     "score": 1.0 if broke else 0.6,
                     "weight": 1.5,
+                    "chart_data": {
+                        "x0": _fmt(data.index[t_idx[0]]),
+                        "x1": _fmt(data.index[-1]),
+                        "y0": round(t2 * 0.99, 2),
+                        "y1": round(neckline * 1.01, 2),
+                        "label": "Inv. Head & Shoulders",
+                        "fill": fill,
+                        "border": border,
+                    },
                 }
 
     return None
@@ -176,6 +210,7 @@ def _detect_double_top(df: pd.DataFrame) -> dict | None:
             f"Two tops at ~${peak_avg:.2f}, support at ${trough:.2f} — "
             f"bearish if ${trough:.2f} breaks; target ${target:.2f}"
         )
+    fill, border = _chart_colors("bearish")
     return {
         "name": "Double Top",
         "value": f"Tops ~${peak_avg:.2f} / Support ${trough:.2f}",
@@ -183,6 +218,15 @@ def _detect_double_top(df: pd.DataFrame) -> dict | None:
         "direction": "bearish",
         "score": -1.0 if broke_support else -0.6,
         "weight": 1.5,
+        "chart_data": {
+            "x0": _fmt(data.index[p1_i]),
+            "x1": _fmt(data.index[-1]),
+            "y0": round(trough * 0.99, 2),
+            "y1": round(peak_avg * 1.01, 2),
+            "label": "Double Top",
+            "fill": fill,
+            "border": border,
+        },
     }
 
 
@@ -226,6 +270,7 @@ def _detect_double_bottom(df: pd.DataFrame) -> dict | None:
             f"Two bottoms at ~${trough_avg:.2f}, resistance at ${peak:.2f} — "
             f"bullish if ${peak:.2f} clears; target ${target:.2f}"
         )
+    fill, border = _chart_colors("bullish")
     return {
         "name": "Double Bottom",
         "value": f"Bottoms ~${trough_avg:.2f} / Resistance ${peak:.2f}",
@@ -233,6 +278,15 @@ def _detect_double_bottom(df: pd.DataFrame) -> dict | None:
         "direction": "bullish",
         "score": 1.0 if broke_resistance else 0.6,
         "weight": 1.5,
+        "chart_data": {
+            "x0": _fmt(data.index[t1_i]),
+            "x1": _fmt(data.index[-1]),
+            "y0": round(trough_avg * 0.99, 2),
+            "y1": round(peak * 1.01, 2),
+            "label": "Double Bottom",
+            "fill": fill,
+            "border": border,
+        },
     }
 
 
@@ -254,8 +308,14 @@ def _detect_triangle(df: pd.DataFrame) -> dict | None:
     low_slope = _linreg_slope_pct(data["Low"])
     flat = 0.0012  # ≈0.12% of price per bar threshold for "flat"
 
+    x0 = _fmt(data.index[0])
+    x1 = _fmt(data.index[-1])
+    y0 = round(float(data["Low"].min()) * 0.99, 2)
+    y1 = round(float(data["High"].max()) * 1.01, 2)
+
     if abs(high_slope) <= flat and low_slope > flat:
         resistance = round(float(data["High"].tail(10).mean()), 2)
+        fill, border = _chart_colors("bullish")
         return {
             "name": "Ascending Triangle",
             "value": f"Flat resistance ~${resistance:.2f} / Rising lows",
@@ -266,10 +326,13 @@ def _detect_triangle(df: pd.DataFrame) -> dict | None:
             "direction": "bullish",
             "score": 0.7,
             "weight": 1.25,
+            "chart_data": {"x0": x0, "x1": x1, "y0": y0, "y1": y1,
+                           "label": "Ascending △", "fill": fill, "border": border},
         }
 
     if abs(low_slope) <= flat and high_slope < -flat:
         support = round(float(data["Low"].tail(10).mean()), 2)
+        fill, border = _chart_colors("bearish")
         return {
             "name": "Descending Triangle",
             "value": f"Flat support ~${support:.2f} / Declining highs",
@@ -280,10 +343,13 @@ def _detect_triangle(df: pd.DataFrame) -> dict | None:
             "direction": "bearish",
             "score": -0.7,
             "weight": 1.25,
+            "chart_data": {"x0": x0, "x1": x1, "y0": y0, "y1": y1,
+                           "label": "Descending △", "fill": fill, "border": border},
         }
 
     if high_slope < -flat and low_slope > flat:
         apex = round((float(data["High"].iloc[-1]) + float(data["Low"].iloc[-1])) / 2, 2)
+        fill, border = _chart_colors("neutral")
         return {
             "name": "Symmetrical Triangle",
             "value": f"Converging toward ~${apex:.2f}",
@@ -294,6 +360,8 @@ def _detect_triangle(df: pd.DataFrame) -> dict | None:
             "direction": "neutral",
             "score": 0.0,
             "weight": 1.0,
+            "chart_data": {"x0": x0, "x1": x1, "y0": y0, "y1": y1,
+                           "label": "Symm. △", "fill": fill, "border": border},
         }
 
     return None
@@ -327,9 +395,14 @@ def _detect_flag(df: pd.DataFrame) -> dict | None:
         return None
 
     current = float(data["Close"].iloc[-1])
+    x0 = _fmt(data.index[0])
+    x1 = _fmt(data.index[-1])
+    y0 = round(float(data["Low"].min()) * 0.99, 2)
+    y1 = round(float(data["High"].max()) * 1.01, 2)
 
     if pole_move > 0:
         target = round(current + (pole_end - pole_start), 2)
+        fill, border = _chart_colors("bullish")
         return {
             "name": "Bull Flag",
             "value": f"Pole +{pole_move*100:.1f}% / Flag {flag_range_pct*100:.1f}% range",
@@ -340,9 +413,12 @@ def _detect_flag(df: pd.DataFrame) -> dict | None:
             "direction": "bullish",
             "score": 0.7,
             "weight": 1.25,
+            "chart_data": {"x0": x0, "x1": x1, "y0": y0, "y1": y1,
+                           "label": "Bull Flag", "fill": fill, "border": border},
         }
     else:
         target = round(current + (pole_end - pole_start), 2)
+        fill, border = _chart_colors("bearish")
         return {
             "name": "Bear Flag",
             "value": f"Pole {pole_move*100:.1f}% / Flag {flag_range_pct*100:.1f}% range",
@@ -353,6 +429,8 @@ def _detect_flag(df: pd.DataFrame) -> dict | None:
             "direction": "bearish",
             "score": -0.7,
             "weight": 1.25,
+            "chart_data": {"x0": x0, "x1": x1, "y0": y0, "y1": y1,
+                           "label": "Bear Flag", "fill": fill, "border": border},
         }
 
 
@@ -393,6 +471,7 @@ def _detect_rectangle(df: pd.DataFrame) -> dict | None:
         direction, score = "neutral", 0.0
         note = "Mid-range — no edge until breakout of the rectangle"
 
+    fill, border = _chart_colors(direction)
     return {
         "name": "Rectangle (Range)",
         "value": f"Support ${support:.2f} / Resistance ${resistance:.2f} ({height_pct:.1f}% range)",
@@ -400,6 +479,15 @@ def _detect_rectangle(df: pd.DataFrame) -> dict | None:
         "direction": direction,
         "score": score,
         "weight": 1.0,
+        "chart_data": {
+            "x0": _fmt(data.index[0]),
+            "x1": _fmt(data.index[-1]),
+            "y0": round(support * 0.99, 2),
+            "y1": round(resistance * 1.01, 2),
+            "label": "Rectangle",
+            "fill": fill,
+            "border": border,
+        },
     }
 
 
@@ -428,6 +516,7 @@ def _detect_gap(df: pd.DataFrame) -> dict | None:
 
         if today_open > prior_high and gap_pct >= 0.5:
             filled = today_close < prior_high
+            fill, border = _chart_colors("bullish" if not filled else "neutral")
             return {
                 "name": "Gap Up",
                 "value": f"Opened ${today_open:.2f} above prior high ${prior_high:.2f} (+{gap_pct:.1f}%)",
@@ -437,10 +526,20 @@ def _detect_gap(df: pd.DataFrame) -> dict | None:
                 "direction": "bullish" if not filled else "neutral",
                 "score": 0.5 if not filled else 0.1,
                 "weight": 1.0,
+                "chart_data": {
+                    "x0": _fmt(data.index[i - 1]),
+                    "x1": _fmt(data.index[i]),
+                    "y0": round(prior_high, 2),
+                    "y1": round(today_open, 2),
+                    "label": f"Gap Up +{gap_pct:.1f}%",
+                    "fill": fill,
+                    "border": border,
+                },
             }
 
         if today_open < prior_low and gap_pct >= 0.5:
             filled = today_close > prior_low
+            fill, border = _chart_colors("bearish" if not filled else "neutral")
             return {
                 "name": "Gap Down",
                 "value": f"Opened ${today_open:.2f} below prior low ${prior_low:.2f} (-{gap_pct:.1f}%)",
@@ -450,6 +549,15 @@ def _detect_gap(df: pd.DataFrame) -> dict | None:
                 "direction": "bearish" if not filled else "neutral",
                 "score": -0.5 if not filled else -0.1,
                 "weight": 1.0,
+                "chart_data": {
+                    "x0": _fmt(data.index[i - 1]),
+                    "x1": _fmt(data.index[i]),
+                    "y0": round(today_open, 2),
+                    "y1": round(prior_low, 2),
+                    "label": f"Gap Down -{gap_pct:.1f}%",
+                    "fill": fill,
+                    "border": border,
+                },
             }
 
     return None
@@ -479,6 +587,7 @@ def _detect_key_reversal(df: pd.DataFrame) -> dict | None:
 
         # Bearish key reversal: new high, closes below prior close
         if bar_high >= lookback_high * 0.995 and bar_close < prior_close and high_vol:
+            fill, border = _chart_colors("bearish")
             return {
                 "name": "Bearish Key Reversal",
                 "value": f"New high ${bar_high:.2f}, closed ${bar_close:.2f} below prior close ${prior_close:.2f}",
@@ -489,10 +598,20 @@ def _detect_key_reversal(df: pd.DataFrame) -> dict | None:
                 "direction": "bearish",
                 "score": -0.8,
                 "weight": 1.25,
+                "chart_data": {
+                    "x0": _fmt(data.index[i - 1]),
+                    "x1": _fmt(data.index[i]),
+                    "y0": round(min(bar_low, prior_close) * 0.99, 2),
+                    "y1": round(bar_high * 1.01, 2),
+                    "label": "Bearish Key Reversal",
+                    "fill": fill,
+                    "border": border,
+                },
             }
 
         # Bullish key reversal: new low, closes above prior close
         if bar_low <= lookback_low * 1.005 and bar_close > prior_close and high_vol:
+            fill, border = _chart_colors("bullish")
             return {
                 "name": "Bullish Key Reversal",
                 "value": f"New low ${bar_low:.2f}, closed ${bar_close:.2f} above prior close ${prior_close:.2f}",
@@ -503,6 +622,15 @@ def _detect_key_reversal(df: pd.DataFrame) -> dict | None:
                 "direction": "bullish",
                 "score": 0.8,
                 "weight": 1.25,
+                "chart_data": {
+                    "x0": _fmt(data.index[i - 1]),
+                    "x1": _fmt(data.index[i]),
+                    "y0": round(bar_low * 0.99, 2),
+                    "y1": round(max(bar_high, prior_close) * 1.01, 2),
+                    "label": "Bullish Key Reversal",
+                    "fill": fill,
+                    "border": border,
+                },
             }
 
     return None

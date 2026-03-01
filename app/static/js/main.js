@@ -1,4 +1,4 @@
-/* MurphyTrend — main.js */
+/* Murphy Trend — main.js */
 'use strict';
 
 // ---- Dark mode toggle ----

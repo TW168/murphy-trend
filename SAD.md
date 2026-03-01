@@ -1,8 +1,8 @@
-# MurphyTrend — Software Architecture Document
+# Murphy Trend — Software Architecture Document
 
 ## Introduction
 
-MurphyTrend is a stock technical analysis web application that implements the methodology from John J. Murphy's *Technical Analysis of the Financial Markets*. It provides trend direction predictions at 30-, 60-, and 90-day horizons with price targets for any publicly traded ticker.
+Murphy Trend is a stock technical analysis web application that implements the methodology from John J. Murphy's *Technical Analysis of the Financial Markets*. It provides trend direction predictions at 30-, 60-, and 90-day horizons with price targets for any publicly traded ticker.
 
 The application is a server-rendered Python web app with real-time market data from Yahoo Finance, a Murphy-based signal engine, and interactive Plotly charts.
 

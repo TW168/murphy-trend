@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{% if result %}{{ result.ticker }} Analysis{% else %}Analyze{% endif %} — MurphyTrend{% endblock %}
+{% block title %}{% if result %}{{ result.ticker }} Analysis{% else %}Analyze{% endif %} — Murphy Trend{% endblock %}
 
 {% block head %}
 <style>
@@ -8,14 +8,17 @@
 .outlook-neutral { background: linear-gradient(135deg, #27780122, #27780108); border-left: 4px solid #6c757d; }
 .score-bar { height: 8px; border-radius: 4px; background: #e9ecef; overflow: hidden; }
 .score-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+[data-pat-idx] { cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+[data-pat-idx]:hover { transform: translateY(-2px); }
+.pattern-highlighted { outline: 2px solid var(--pat-border, #f4a261); outline-offset: 2px; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12) !important; }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Ticker Search -->
 <section class="py-4 border-bottom">
-  <div class="container">
-    <form action="/analyze" method="get">
+  <div class="container-fluid px-4 px-lg-5">
+    <form action="/analyze" method="get" target="_blank">
       <div class="input-group shadow-sm" style="max-width:560px">
         <span class="input-group-text bg-white border-end-0">
           <i class="bi bi-search text-muted"></i>
@@ -45,7 +48,7 @@
 <!-- Empty State -->
 {% elif not result %}
 <section class="py-6 text-center">
-  <div class="container">
+  <div class="container-fluid px-4 px-lg-5">
     <div class="empty-state mx-auto">
       <i class="bi bi-bar-chart-line-fill empty-icon"></i>
       <h3 class="mt-4 fw-600">Analyze Any Stock</h3>
@@ -63,14 +66,14 @@
 
 <!-- Company Header -->
 <section class="py-4">
-  <div class="container">
+  <div class="container-fluid px-4 px-lg-5">
     <div class="row align-items-center g-3">
       <div class="col-auto">
         <div class="ticker-badge">{{ result.ticker }}</div>
       </div>
       <div class="col">
         <h2 class="mb-0 fw-700">{{ result.company_name }}</h2>
-        <div class="text-muted small">{{ result.sector }} &bull; Last updated {{ result.last_updated[:16].replace("T"," ") }} UTC</div>
+        <div class="text-muted small">{{ result.sector }} &bull; Last updated {{ result.last_updated.replace("T"," ") }} CT</div>
       </div>
       <div class="col-auto text-end">
         <div class="price-display">${{ "{:,.2f}".format(result.current_price) }}</div>
@@ -85,7 +88,7 @@
 
 <!-- Murphy Outlook Banner -->
 <section class="py-3">
-  <div class="container">
+  <div class="container-fluid px-4 px-lg-5">
     <div class="outlook-card outlook-{{ result.outlook }} p-4 rounded-3">
       <div class="row align-items-center g-3">
         <div class="col-auto">
@@ -124,7 +127,7 @@
 
 <!-- Chart -->
 <section class="py-3">
-  <div class="container">
+  <div class="container-fluid px-4 px-lg-5">
     <div class="card shadow-sm">
       <div class="card-header fw-600">
         <i class="bi bi-candlestick me-2 text-primary"></i>Price Chart — {{ result.ticker }}
@@ -139,18 +142,21 @@
 
 <!-- Detected Patterns -->
 <section class="py-3">
-  <div class="container">
+  <div class="container-fluid px-4 px-lg-5">
     {% set patterns = result.patterns | default([]) %}
     <div class="card shadow-sm">
       <div class="card-header d-flex justify-content-between align-items-center fw-600">
         <span>
           <i class="bi bi-puzzle me-2 text-primary"></i>Detected Chart Patterns
         </span>
-        {% if patterns %}
-        <span class="badge rounded-pill bg-primary">{{ patterns | length }} found</span>
-        {% else %}
-        <span class="badge rounded-pill bg-secondary">None detected</span>
-        {% endif %}
+        <div class="d-flex align-items-center gap-2">
+          {% if patterns %}
+          <span class="text-muted fw-400 small"><i class="bi bi-hand-index me-1"></i>Click a card to highlight on chart</span>
+          <span class="badge rounded-pill bg-primary">{{ patterns | length }} found</span>
+          {% else %}
+          <span class="badge rounded-pill bg-secondary">None detected</span>
+          {% endif %}
+        </div>
       </div>
       <div class="card-body">
         {% if patterns %}
@@ -160,7 +166,9 @@
             <div class="pattern-card p-3 rounded-3 h-100
               {% if pat.direction == 'bullish' %}pattern-bull
               {% elif pat.direction == 'bearish' %}pattern-bear
-              {% else %}pattern-neutral{% endif %}">
+              {% else %}pattern-neutral{% endif %}"
+              data-pat-idx="{{ loop.index0 }}"
+              {% if pat.chart_data %}style="--pat-border:{{ pat.chart_data.border }}"{% endif %}>
               <div class="d-flex justify-content-between align-items-start mb-2">
                 <span class="fw-600 small">
                   {% if pat.direction == 'bullish' %}
@@ -199,7 +207,7 @@
 
 <!-- Signals + Predictions + Levels -->
 <section class="py-3 pb-5">
-  <div class="container">
+  <div class="container-fluid px-4 px-lg-5">
     <div class="row g-4">
 
       <!-- Signals -->
@@ -350,6 +358,67 @@
     displayModeBar: true,
     modeBarButtonsToRemove: ['select2d', 'lasso2d'],
     displaylogo: false,
+  });
+
+  // Baseline shapes/annotations drawn by Python (gaps, S/R labels)
+  const baseShapes = (chartData.layout.shapes || []).map(s => ({...s}));
+  const baseAnnotations = (chartData.layout.annotations || []).map(a => ({...a}));
+
+  // Pattern highlight on click
+  const patternsData = {{ result.patterns | tojson | safe }};
+  let activeIdx = -1;
+
+  document.querySelectorAll('[data-pat-idx]').forEach(card => {
+    const idx = parseInt(card.dataset.patIdx, 10);
+    const pat = patternsData[idx];
+    if (!pat || !pat.chart_data) return;
+
+    card.addEventListener('click', () => {
+      // Toggle off if same card clicked again
+      if (activeIdx === idx) {
+        activeIdx = -1;
+        document.querySelectorAll('[data-pat-idx]').forEach(c => c.classList.remove('pattern-highlighted'));
+        Plotly.relayout('chart', { shapes: baseShapes, annotations: baseAnnotations });
+        return;
+      }
+
+      document.querySelectorAll('[data-pat-idx]').forEach(c => c.classList.remove('pattern-highlighted'));
+      card.classList.add('pattern-highlighted');
+      activeIdx = idx;
+
+      const cd = pat.chart_data;
+      const patShape = {
+        type: 'rect',
+        xref: 'x', yref: 'y',
+        x0: cd.x0, x1: cd.x1,
+        y0: cd.y0, y1: cd.y1,
+        fillcolor: cd.fill,
+        line: { color: cd.border, width: 2, dash: 'dot' },
+        layer: 'below',
+      };
+      const patAnnotation = {
+        x: cd.x1, y: cd.y1,
+        xref: 'x', yref: 'y',
+        text: '<b>' + cd.label + '</b>',
+        showarrow: true,
+        arrowhead: 2,
+        arrowcolor: cd.border,
+        arrowsize: 0.8,
+        font: { size: 11, color: cd.border },
+        bgcolor: 'rgba(255,255,255,0.92)',
+        bordercolor: cd.border,
+        borderpad: 4,
+        borderwidth: 1,
+        xanchor: 'left',
+      };
+
+      Plotly.relayout('chart', {
+        shapes: [...baseShapes, patShape],
+        annotations: [...baseAnnotations, patAnnotation],
+      });
+
+      document.getElementById('chart').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   });
 })();
 </script>

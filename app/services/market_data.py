@@ -27,9 +27,15 @@ def fetch_ticker_info(ticker: str) -> dict:
     """Return basic info dict for a ticker (name, sector, market cap)."""
     t = yf.Ticker(ticker)
     info = t.info or {}
+    sector = (
+        info.get("sector")
+        or info.get("category")
+        or info.get("quoteType")
+        or "N/A"
+    )
     return {
         "company_name": info.get("longName") or info.get("shortName") or ticker.upper(),
-        "sector": info.get("sector") or "N/A",
+        "sector": sector,
         "market_cap": info.get("marketCap"),
         "currency": info.get("currency", "USD"),
     }

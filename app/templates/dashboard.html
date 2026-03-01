@@ -1,17 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — MurphyTrend{% endblock %}
+{% block title %}Dashboard — Murphy Trend{% endblock %}
 
 {% block content %}
 <!-- Hero -->
 <section class="hero-section">
-  <div class="container">
+  <div class="container-fluid px-4 px-lg-5">
     <div class="row align-items-center">
       <div class="col-lg-7">
         <h1 class="hero-title">Market Pulse</h1>
         <p class="hero-sub">Murphy-method technical analysis for any stock or ETF</p>
       </div>
       <div class="col-lg-5">
-        <form action="/analyze" method="get" class="search-form">
+        <form action="/analyze" method="get" class="search-form" target="_blank">
           <div class="input-group input-group-lg shadow-sm">
             <input type="text" name="ticker" class="form-control search-input"
                    placeholder="Enter ticker — e.g. AAPL, MSFT, SPY"
@@ -28,7 +28,7 @@
 
 <!-- Market Indices -->
 <section class="py-5">
-  <div class="container">
+  <div class="container-fluid px-4 px-lg-5">
     <h5 class="section-label mb-4">Major Indices</h5>
     <div class="row g-4">
       {% for idx in indices %}
@@ -66,7 +66,7 @@
 
 <!-- Watchlist -->
 <section class="py-4 pb-5">
-  <div class="container">
+  <div class="container-fluid px-4 px-lg-5">
     <div class="row g-4">
 
       <!-- Watchlist -->

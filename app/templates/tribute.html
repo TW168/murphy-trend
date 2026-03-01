@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% block title %}A Tribute to John J. Murphy — Murphy Trend{% endblock %}
+
+{% block head %}
+<style>
+  .tribute-hero {
+    background: linear-gradient(135deg, #2a9d8f15 0%, #277da115 100%);
+    border-bottom: 1px solid #e9ecef;
+  }
+  .book-cover {
+    background: linear-gradient(145deg, #2a9d8f, #277da1);
+    border-radius: 8px;
+    padding: 2.5rem 2rem;
+    color: #fff;
+    box-shadow: 6px 6px 0 rgba(0,0,0,0.15);
+    max-width: 260px;
+  }
+  .book-cover .book-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
+  .book-cover .book-author {
+    font-size: 0.85rem;
+    opacity: 0.85;
+  }
+  .book-cover .book-edition {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-top: 0.25rem;
+  }
+  .book-cover .book-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+  }
+  .principle-card {
+    border-left: 4px solid #2a9d8f;
+    background: #fff;
+    border-radius: 0 8px 8px 0;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .principle-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(42,157,143,0.12);
+  }
+  .quote-block {
+    border-left: 4px solid #277da1;
+    background: #f0f7ff;
+    border-radius: 0 8px 8px 0;
+    padding: 1.5rem 2rem;
+    font-style: italic;
+    color: #2b2d42;
+    font-size: 1.05rem;
+  }
+  .quote-block cite {
+    display: block;
+    margin-top: 0.75rem;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #277da1;
+  }
+  .timeline-dot {
+    width: 12px;
+    height: 12px;
+    background: #2a9d8f;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .chapter-badge {
+    background: #2a9d8f1a;
+    color: #2a9d8f;
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="tribute-hero py-5">
+  <div class="container-fluid px-4 px-lg-5">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <p class="text-primary fw-600 mb-2 small text-uppercase tracking-wide">
+          <i class="bi bi-heart-fill me-1"></i>A Tribute
+        </p>
+        <h1 class="fw-700 display-5 mb-3" style="color:#2b2d42;">
+          Thank You,<br>John J. Murphy
+        </h1>
+        <p class="lead text-muted mb-4">
+          This application exists because of one book. <em>Technical Analysis of the Financial Markets</em>
+          is the definitive guide that turned chart-reading from art into a disciplined methodology —
+          and every signal, indicator, and prediction in Murphy Trend traces directly back to its pages.
+        </p>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <span class="badge rounded-pill px-3 py-2" style="background:#2a9d8f; font-size:0.85rem;">
+            <i class="bi bi-book me-1"></i>Published 1999
+          </span>
+          <span class="badge rounded-pill px-3 py-2" style="background:#277da1; font-size:0.85rem;">
+            <i class="bi bi-star-fill me-1"></i>Industry Standard
+          </span>
+          <span class="badge rounded-pill px-3 py-2 bg-secondary">
+            <i class="bi bi-graph-up me-1"></i>576 Pages of Wisdom
+          </span>
+        </div>
+      </div>
+      <div class="col-lg-5 d-flex justify-content-center">
+        <div class="book-cover text-center">
+          <div class="book-icon"><i class="bi bi-book-half"></i></div>
+          <div class="book-title">Technical Analysis of the Financial Markets</div>
+          <div class="book-author">John J. Murphy</div>
+          <div class="book-edition">New York Institute of Finance · 1999</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About Murphy + Quote -->
+<section class="py-5">
+  <div class="container-fluid px-4 px-lg-5">
+    <div class="row g-5">
+      <div class="col-lg-6">
+        <h2 class="fw-700 mb-4" style="color:#2b2d42;">Who Is John J. Murphy?</h2>
+        <p class="text-muted mb-3">
+          John J. Murphy is one of the most respected technical analysts in the world. With decades of
+          experience as a market analyst and author, he served as the technical analyst for CNBC for
+          seven years and has consulted for major financial institutions globally.
+        </p>
+        <p class="text-muted mb-4">
+          His book, first published in 1986 and comprehensively updated in 1999, synthesised the entire
+          field of technical analysis into a single authoritative reference. It covers everything from
+          Dow Theory and trend analysis to oscillators, Fibonacci retracements, Elliott Wave, and
+          intermarket analysis — making it required reading for the Chartered Market Technician (CMT) exam.
+        </p>
+        <div class="quote-block">
+          "The technical approach to investment is essentially a reflection of the idea that prices move
+          in trends and that these trends tend to persist. A chart of past price action contains all the
+          information you need to make intelligent trading decisions."
+          <cite>— John J. Murphy, Technical Analysis of the Financial Markets</cite>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="col-lg-6">
+        <h2 class="fw-700 mb-4" style="color:#2b2d42;">
+          <i class="bi bi-clock-history text-primary me-2"></i>A Legacy in Milestones
+        </h2>
+        <div class="d-flex flex-column gap-3">
+          <div class="d-flex gap-3">
+            <div class="timeline-dot mt-1"></div>
+            <div>
+              <strong>1986</strong> — First edition of <em>Technical Analysis of the Futures Markets</em> published, later expanded to cover all financial markets.
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <div class="timeline-dot mt-1"></div>
+            <div>
+              <strong>1991–1998</strong> — Murphy serves as CNBC's on-air technical analyst, bringing chart analysis to mainstream investors.
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <div class="timeline-dot mt-1"></div>
+            <div>
+              <strong>1999</strong> — The fully revised <em>Technical Analysis of the Financial Markets</em> is published by the New York Institute of Finance — the edition this app is based on.
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <div class="timeline-dot mt-1"></div>
+            <div>
+              <strong>2000s–present</strong> — The book becomes mandatory reading for the CMT (Chartered Market Technician) designation and remains the industry's standard reference.
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <div class="timeline-dot mt-1" style="background:#277da1;"></div>
+            <div>
+              <strong>{{ chicago_time }}</strong> — Murphy Trend is built, bringing Murphy's methodology to life as an automated, real-time analysis tool.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- What This App Owes Him -->
+<section class="py-5" style="background:#f8fafc; border-top:1px solid #e9ecef; border-bottom:1px solid #e9ecef;">
+  <div class="container-fluid px-4 px-lg-5">
+    <h2 class="fw-700 mb-2" style="color:#2b2d42;">
+      <i class="bi bi-link-45deg text-primary me-2"></i>What Murphy Trend Owes to the Book
+    </h2>
+    <p class="text-muted mb-4">
+      Every analytical feature in this application is grounded in a specific chapter or concept from Murphy's book.
+    </p>
+    <div class="row g-3">
+      <div class="col-md-6 col-xl-3">
+        <div class="principle-card h-100">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <strong>Trend Analysis &amp; Dow Theory</strong>
+            <span class="chapter-badge">Ch. 1–4</span>
+          </div>
+          <p class="text-muted small mb-0">Higher highs / higher lows, secondary trends, trendline channels, and support &amp; resistance zones form the backbone of the outlook score.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="principle-card h-100">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <strong>Retracements &amp; Fibonacci</strong>
+            <span class="chapter-badge">Ch. 4 &amp; 13</span>
+          </div>
+          <p class="text-muted small mb-0">The 33 %, 50 %, 66 % retracement zones and Fibonacci 38.2 % / 61.8 % levels used for price-target calculation come directly from Murphy's framework.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="principle-card h-100">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <strong>Chart Patterns</strong>
+            <span class="chapter-badge">Ch. 5–6</span>
+          </div>
+          <p class="text-muted small mb-0">Head &amp; Shoulders, double / triple tops &amp; bottoms, triangles, flags, pennants, rectangles, gaps, and key reversal days — all from Murphy's pattern taxonomy.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="principle-card h-100">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <strong>Moving Averages</strong>
+            <span class="chapter-badge">Ch. 9</span>
+          </div>
+          <p class="text-muted small mb-0">The 50-day and 200-day MAs, golden cross, death cross, and price position relative to the moving average envelope are implemented exactly as Murphy prescribes.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="principle-card h-100">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <strong>Oscillators — RSI &amp; MACD</strong>
+            <span class="chapter-badge">Ch. 10</span>
+          </div>
+          <p class="text-muted small mb-0">RSI(14) with overbought (70) / oversold (30) thresholds, divergence detection, and MACD line / signal crossovers follow Murphy's oscillator methodology precisely.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="principle-card h-100">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <strong>Volume &amp; OBV</strong>
+            <span class="chapter-badge">Ch. 7</span>
+          </div>
+          <p class="text-muted small mb-0">Volume confirmation of breakouts and OBV trend analysis are central Murphy principles for validating price moves before acting on signals.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="principle-card h-100">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <strong>Bollinger Bands &amp; Volatility</strong>
+            <span class="chapter-badge">Ch. 9</span>
+          </div>
+          <p class="text-muted small mb-0">Bollinger Bands (20, 2) for volatility measurement and price-target projection via band width and measured-move techniques.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Closing thank you -->
+<section class="py-5">
+  <div class="container-fluid px-4 px-lg-5">
+    <div class="card border-0 shadow-sm rounded-3 p-5 text-center" style="background: linear-gradient(135deg, #2a9d8f12, #277da112);">
+      <i class="bi bi-heart-fill text-primary mb-3" style="font-size:2.5rem;"></i>
+      <h4 class="fw-700 mb-2">Thank You, John</h4>
+      <p class="text-muted mb-0 mx-auto" style="max-width:600px;">
+        Murphy Trend is a humble attempt to honour your life's work. Every chart, every signal,
+        every price target is a direct expression of the principles you spent decades codifying.
+        This app would not exist without your book.
+      </p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

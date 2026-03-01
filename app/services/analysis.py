@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from typing import Any
 
 import numpy as np
@@ -456,11 +457,54 @@ def _calculate_targets(
 # ---------------------------------------------------------------------------
 
 
+def _find_chart_gaps(df: pd.DataFrame, min_pct: float = 0.75) -> list[dict]:
+    """Return true price gaps in df for chart drawing (Murphy definition).
+
+    A true gap means the entire session range does not overlap with the prior
+    session range — no trading occurred in the gap zone.
+      Gap up:   curr["Low"]  > prev["High"]
+      Gap down: curr["High"] < prev["Low"]
+
+    y0/y1 define the unfilled price zone between the two sessions.
+    """
+    gaps = []
+    for i in range(1, len(df)):
+        prev = df.iloc[i - 1]
+        curr = df.iloc[i]
+        prev_high = float(prev["High"])
+        prev_low = float(prev["Low"])
+        curr_high = float(curr["High"])
+        curr_low = float(curr["Low"])
+
+        if curr_low > prev_high:
+            gap_pct = (curr_low - prev_high) / prev_high * 100
+            if gap_pct >= min_pct:
+                gaps.append({
+                    "date_prev": df.index[i - 1],
+                    "date": df.index[i],
+                    "y0": prev_high,
+                    "y1": curr_low,
+                    "direction": "up",
+                })
+        elif curr_high < prev_low:
+            gap_pct = (prev_low - curr_high) / prev_low * 100
+            if gap_pct >= min_pct:
+                gaps.append({
+                    "date_prev": df.index[i - 1],
+                    "date": df.index[i],
+                    "y0": curr_high,
+                    "y1": prev_low,
+                    "direction": "down",
+                })
+    return gaps
+
+
 def _build_chart(df: pd.DataFrame, sma50: pd.Series, sma200: pd.Series,
                  bb_upper: pd.Series, bb_mid: pd.Series, bb_lower: pd.Series,
                  macd_line: pd.Series, signal_line: pd.Series, macd_hist: pd.Series,
                  rsi_series: pd.Series,
-                 support: list[float], resistance: list[float]) -> str:
+                 support: list[float], resistance: list[float],
+                 gaps: list[dict] | None = None) -> str:
     fig = make_subplots(
         rows=3, cols=1,
         shared_xaxes=True,
@@ -498,6 +542,30 @@ def _build_chart(df: pd.DataFrame, sma50: pd.Series, sma200: pd.Series,
     for lvl in resistance:
         fig.add_hline(y=lvl, line_dash="dot", line_color="#e63946", line_width=1,
                       annotation_text=f"R {lvl:.2f}", annotation_position="right", row=1, col=1)
+
+    # Gap shading
+    for g in (gaps or []):
+        color = "rgba(42,157,143,0.15)" if g["direction"] == "up" else "rgba(230,57,70,0.15)"
+        border = "#2a9d8f" if g["direction"] == "up" else "#e63946"
+        label = f"Gap {'Up' if g['direction'] == 'up' else 'Down'} +{g['y1'] - g['y0']:.2f}" if g["direction"] == "up" else f"Gap Down -{g['y1'] - g['y0']:.2f}"
+        fig.add_shape(
+            type="rect",
+            x0=g["date_prev"], x1=g["date"],
+            y0=g["y0"], y1=g["y1"],
+            fillcolor=color,
+            line=dict(color=border, width=0.5, dash="dot"),
+            row=1, col=1,
+        )
+        fig.add_annotation(
+            x=g["date"], y=(g["y0"] + g["y1"]) / 2,
+            text=label,
+            showarrow=False,
+            font=dict(size=9, color=border),
+            xanchor="left",
+            bgcolor="rgba(255,255,255,0.7)",
+            borderpad=2,
+            row=1, col=1,
+        )
 
     # MACD
     hist_colors = ["#2a9d8f" if v >= 0 else "#e63946" for v in macd_hist.fillna(0)]
@@ -629,12 +697,39 @@ def analyze_ticker(ticker: str) -> dict[str, Any]:
     predictions = _calculate_targets(df, outlook_score, atr_val)
 
     # --- Chart ---
+    chart_gaps = _find_chart_gaps(df)
+
+    # Add chart gaps as pattern cards (clickable, in sync with chart shapes)
+    for g in chart_gaps[-5:]:
+        direction = "bullish" if g["direction"] == "up" else "bearish"
+        fill = "rgba(42,157,143,0.22)" if direction == "bullish" else "rgba(230,57,70,0.22)"
+        border = "#2a9d8f" if direction == "bullish" else "#e63946"
+        gap_pct = abs(g["y1"] - g["y0"]) / (g["y0"] if g["direction"] == "up" else g["y1"]) * 100
+        sign = "+" if g["direction"] == "up" else "-"
+        label = f"Gap {'Up' if g['direction'] == 'up' else 'Down'} {sign}{gap_pct:.1f}%"
+        patterns_out.append({
+            "name": f"Gap {'Up' if g['direction'] == 'up' else 'Down'}",
+            "value": f"${g['y0']:.2f} → ${g['y1']:.2f} ({sign}{gap_pct:.1f}%)",
+            "interpretation": f"Unfilled gap on {g['date'].strftime('%b %d, %Y')} — the gap zone is shaded on the chart above",
+            "direction": direction,
+            "chart_data": {
+                "x0": g["date_prev"].strftime("%Y-%m-%d"),
+                "x1": g["date"].strftime("%Y-%m-%d"),
+                "y0": g["y0"],
+                "y1": g["y1"],
+                "label": label,
+                "fill": fill,
+                "border": border,
+            },
+        })
+
     chart_json = _build_chart(
         df, sma50_s, sma200_s,
         bb_upper_s, bb_mid_s, bb_lower_s,
         macd_line_s, signal_line_s, hist_s,
         rsi_s,
         current_support[:2], current_resist[:2],
+        gaps=chart_gaps,
     )
 
     return {
@@ -660,5 +755,5 @@ def analyze_ticker(ticker: str) -> dict[str, Any]:
         "resistance_levels": current_resist,
         "fib_levels": fib_levels,
         "chart_json": chart_json,
-        "last_updated": datetime.utcnow().isoformat(),
+        "last_updated": datetime.now(ZoneInfo("America/Chicago")).strftime("%Y-%m-%dT%H:%M"),
     }
