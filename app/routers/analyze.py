@@ -3,15 +3,14 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.models import AnalysisCache
 from app.services.analysis import analyze_ticker
+from app.templating import templates
 
 router = APIRouter(tags=["analyze"])
-templates = Jinja2Templates(directory="app/templates")
 
 
 def _get_cached(db: Session, ticker: str) -> dict | None:

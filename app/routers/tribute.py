@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
+
+from app.templating import templates
 
 router = APIRouter(tags=["tribute"])
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/tribute", response_class=HTMLResponse)

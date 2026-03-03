@@ -3,11 +3,11 @@ from pathlib import Path
 import markdown2
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from pygments.formatters import HtmlFormatter
 
+from app.templating import templates
+
 router = APIRouter(tags=["sad"])
-templates = Jinja2Templates(directory="app/templates")
 
 SAD_PATH = Path("SAD.md")
 
