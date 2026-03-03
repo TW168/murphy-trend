@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from datetime import datetime
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -25,3 +26,4 @@ app.include_router(health.router)
 app.include_router(tribute.router)
 
 templates = Jinja2Templates(directory="app/templates")
+templates.env.globals["now"] = datetime.utcnow
