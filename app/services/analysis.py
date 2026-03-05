@@ -16,7 +16,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from app.services.market_data import fetch_stock_data, fetch_ticker_info
+from app.services.market_data import fetch_stock_data, fetch_ticker_info, fetch_valuation_data
 from app.services.patterns import detect_patterns
 
 
@@ -610,6 +610,7 @@ def analyze_ticker(ticker: str) -> dict[str, Any]:
     ticker = ticker.upper().strip()
     df = fetch_stock_data(ticker, period="2y")
     info = fetch_ticker_info(ticker)
+    valuation = fetch_valuation_data(ticker)
 
     close = df["Close"]
     price = float(close.iloc[-1])
@@ -755,5 +756,6 @@ def analyze_ticker(ticker: str) -> dict[str, Any]:
         "resistance_levels": current_resist,
         "fib_levels": fib_levels,
         "chart_json": chart_json,
+        "valuation": valuation,
         "last_updated": datetime.now(ZoneInfo("America/Chicago")).strftime("%Y-%m-%dT%H:%M"),
     }

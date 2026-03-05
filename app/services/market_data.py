@@ -41,6 +41,52 @@ def fetch_ticker_info(ticker: str) -> dict:
     }
 
 
+def fetch_valuation_data(ticker: str) -> dict:
+    """Return valuation measures and financial highlights from yfinance."""
+    info = yf.Ticker(ticker).info or {}
+
+    def _fmt_large(val):
+        if val is None:
+            return None
+        if val >= 1e12:
+            return f"{val/1e12:.2f}T"
+        if val >= 1e9:
+            return f"{val/1e9:.2f}B"
+        if val >= 1e6:
+            return f"{val/1e6:.2f}M"
+        return f"{val:,.0f}"
+
+    def _fmt_pct(val):
+        return f"{val*100:.2f}%" if val is not None else None
+
+    def _fmt_ratio(val, decimals=2):
+        return f"{val:.{decimals}f}" if val is not None else None
+
+    return {
+        # Valuation Measures
+        "market_cap": _fmt_large(info.get("marketCap")),
+        "enterprise_value": _fmt_large(info.get("enterpriseValue")),
+        "trailing_pe": _fmt_ratio(info.get("trailingPE")),
+        "forward_pe": _fmt_ratio(info.get("forwardPE")),
+        "peg_ratio": _fmt_ratio(info.get("pegRatio")),
+        "price_to_sales": _fmt_ratio(info.get("priceToSalesTrailing12Months")),
+        "price_to_book": _fmt_ratio(info.get("priceToBook")),
+        "ev_to_revenue": _fmt_ratio(info.get("enterpriseToRevenue")),
+        "ev_to_ebitda": _fmt_ratio(info.get("enterpriseToEbitda")),
+        # Profitability
+        "profit_margin": _fmt_pct(info.get("profitMargins")),
+        "return_on_assets": _fmt_pct(info.get("returnOnAssets")),
+        "return_on_equity": _fmt_pct(info.get("returnOnEquity")),
+        "revenue_ttm": _fmt_large(info.get("totalRevenue")),
+        "net_income_ttm": _fmt_large(info.get("netIncomeToCommon")),
+        "diluted_eps": _fmt_ratio(info.get("trailingEps")),
+        # Balance Sheet
+        "total_cash": _fmt_large(info.get("totalCash")),
+        "debt_to_equity": _fmt_ratio(info.get("debtToEquity")),
+        "levered_fcf": _fmt_large(info.get("freeCashflow")),
+    }
+
+
 def fetch_index_quotes() -> list[dict]:
     """Fetch current quotes for major market indices."""
     results = []
