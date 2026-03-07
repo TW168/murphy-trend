@@ -88,7 +88,8 @@ app/
 │   └── schemas.py       # Pydantic schemas (AnalysisResponse, Signal, Prediction, …)
 ├── services/
 │   ├── market_data.py   # yfinance wrappers: fetch_stock_data, fetch_index_quotes
-│   └── analysis.py      # Murphy signal engine, chart builder, price targets
+│   ├── analysis.py      # Murphy signal engine, chart builder, price targets
+│   └── fear_greed.py    # CNN-style Fear & Greed Index (7 components, 0-100)
 ├── routers/
 │   ├── dashboard.py     # GET /, POST /watchlist/add, POST /watchlist/remove/{ticker}
 │   ├── analyze.py       # GET /analyze, POST /analyze (redirect)
@@ -116,7 +117,7 @@ SAD.md                   # This document
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | Dashboard: market indices + watchlist |
+| GET | `/` | Dashboard: market indices, Fear & Greed Index, watchlist |
 | GET | `/analyze?ticker=AAPL` | Full technical analysis for ticker |
 | POST | `/analyze` | Redirect to GET with ticker param |
 | POST | `/watchlist/add` | Add ticker to watchlist |
@@ -138,6 +139,24 @@ The `analyze_ticker(ticker)` service returns a dict with:
 - `fib_levels` — Fibonacci retracement dict (0%, 23.6%, 38.2%, 50%, 61.8%, 100%)
 - `patterns` — list of detected chart patterns `{name, value, interpretation, direction, score, weight}`
 - `chart_json` — Plotly figure JSON (candlestick + BB + SMA + MACD + RSI)
+
+### Fear & Greed Index
+
+The `calculate_fear_greed()` service in `fear_greed.py` computes a CNN-style market sentiment index (0-100) from 7 equally-weighted components. Each indicator is scored by how much it deviates from its average compared to how much it normally diverges, using a 125-day rolling percentile rank (the CNN methodology).
+
+| # | Component | Data Source | Method |
+|---|-----------|-------------|--------|
+| 1 | Market Momentum | ^GSPC | S&P 500 price percentile rank over 125 days |
+| 2 | Stock Price Strength | 11 sector ETFs | Average 52-week range percentile |
+| 3 | Stock Price Breadth | 11 sector ETFs | Advance/decline ratio, percentile-ranked |
+| 4 | Put/Call Options | ^SKEW | SKEW index percentile rank (inverted, proxy) |
+| 5 | Market Volatility | ^VIX | VIX vs 50d MA deviation, percentile-ranked (inverted) |
+| 6 | Safe Haven Demand | SPY, TLT | 20-day return spread, percentile-ranked |
+| 7 | Junk Bond Demand | HYG, LQD | 20-day return spread, percentile-ranked |
+
+Labels: 0-24 Extreme Fear, 25-44 Fear, 45-55 Neutral, 56-74 Greed, 75-100 Extreme Greed.
+
+Data is fetched in a single `yf.download()` call for all tickers. Results are cached in-memory per calendar day. The dashboard displays a canvas semicircle gauge, component progress bars, and a Plotly historical chart with 125-day MA overlay.
 
 ### Signal Scoring Weights
 

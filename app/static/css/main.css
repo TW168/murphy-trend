@@ -287,6 +287,25 @@ body {
 [data-bs-theme="dark"] .accordion-item { background: var(--mt-card); border-color: var(--mt-border); }
 [data-bs-theme="dark"] .accordion-button { background: var(--mt-card); color: var(--mt-text); }
 
+/* ---- Fear & Greed Index ---- */
+.fg-gauge-container { position: relative; display: inline-block; }
+.fg-score { font-size: 2.5rem; font-weight: 700; color: var(--mt-text); margin-top: -0.5rem; }
+.fg-label { font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.fg-label-extreme-fear { color: #e63946; }
+.fg-label-fear { color: #f4a261; }
+.fg-label-neutral { color: var(--mt-muted); }
+.fg-label-greed { color: #2a9d8f; }
+.fg-label-extreme-greed { color: #1d8a7e; }
+
+.fg-component .progress { background: var(--mt-border); border-radius: 2px; }
+.fg-bar-extreme-fear { background: #e63946; }
+.fg-bar-fear { background: #f4a261; }
+.fg-bar-neutral { background: #6c757d; }
+.fg-bar-greed { background: #2a9d8f; }
+.fg-bar-extreme-greed { background: #1d8a7e; }
+
+[data-bs-theme="dark"] .fg-component .progress { background: #2d3248; }
+
 /* ---- Animations ---- */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .card { animation: fadeIn 0.3s ease forwards; }

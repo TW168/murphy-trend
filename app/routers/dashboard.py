@@ -1,9 +1,12 @@
+import asyncio
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.models import Watchlist
+from app.services.fear_greed import calculate_fear_greed
 from app.services.market_data import fetch_index_quotes
 from app.templating import templates
 
@@ -13,10 +16,21 @@ router = APIRouter(tags=["dashboard"])
 @router.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, db: Session = Depends(get_db)):
     indices = fetch_index_quotes()
-    watchlist = db.query(Watchlist).order_by(Watchlist.created_at.desc()).limit(20).all()
+    watchlist = (
+        db.query(Watchlist)
+        .order_by(Watchlist.created_at.desc())
+        .limit(20)
+        .all()
+    )
+    fear_greed = await asyncio.to_thread(calculate_fear_greed)
     return templates.TemplateResponse(
         "dashboard.html",
-        {"request": request, "indices": indices, "watchlist": watchlist},
+        {
+            "request": request,
+            "indices": indices,
+            "watchlist": watchlist,
+            "fear_greed": fear_greed,
+        },
     )
 
 

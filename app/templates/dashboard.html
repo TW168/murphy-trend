@@ -64,6 +64,104 @@
   </div>
 </section>
 
+<!-- Fear & Greed Index -->
+{% if fear_greed and fear_greed.score is not none %}
+<section class="py-4">
+  <div class="container-fluid px-4 px-lg-5">
+    <div class="row g-4">
+
+      <!-- Fear & Greed Card -->
+      <div class="col-lg-7">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="section-label mb-3">Fear & Greed Index</h5>
+            <div class="row align-items-center">
+
+              <!-- Gauge -->
+              <div class="col-md-5 text-center mb-4 mb-md-0">
+                <div class="fg-gauge-container">
+                  <canvas id="fgGauge" width="260" height="160"></canvas>
+                  <div class="fg-score">{{ fear_greed.score }}</div>
+                  <div class="fg-label fg-label-{{ fear_greed.label|lower|replace(' ', '-') }}">
+                    {{ fear_greed.label }}
+                  </div>
+                </div>
+                <div class="text-muted small mt-2">Updated {{ fear_greed.last_updated }}</div>
+              </div>
+
+              <!-- Components -->
+              <div class="col-md-7">
+                <h6 class="section-label mb-3">Components</h6>
+                {% for comp in fear_greed.components %}
+                <div class="fg-component mb-2">
+                  <div class="d-flex justify-content-between small mb-1">
+                    <span>{{ comp.name }}</span>
+                    <span class="fw-600 {% if comp.score >= 56 %}text-success{% elif comp.score <= 44 %}text-danger{% else %}text-muted{% endif %}">
+                      {{ comp.score }}
+                    </span>
+                  </div>
+                  <div class="progress" style="height: 4px;">
+                    <div class="progress-bar fg-bar-{% if comp.score >= 75 %}extreme-greed{% elif comp.score >= 56 %}greed{% elif comp.score >= 45 %}neutral{% elif comp.score >= 25 %}fear{% else %}extreme-fear{% endif %}"
+                         style="width: {{ comp.score }}%"></div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Market Volatility (VIX) Card -->
+      <div class="col-lg-5">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h5 class="section-label mb-0">
+                  Market Volatility
+                  <i class="bi bi-info-circle text-muted ms-1" style="font-size: 0.75rem; cursor: help;"
+                     data-bs-toggle="tooltip" data-bs-placement="bottom"
+                     data-bs-title="The most well-known measure of market sentiment is the CBOE Volatility Index, or VIX. The VIX measures expected price fluctuations or volatility in the S&P 500 Index options over the next 30 days. The VIX often drops on days when the broader market rallies and soars when stocks plunge. But the key is to look at the VIX over time. It tends to be lower in bull markets and higher when the bears are in control. The Fear & Greed Index uses increasing market volatility as a signal for Fear."></i>
+                </h5>
+                {% if fear_greed.vix_current and fear_greed.vix_sma50 %}
+                  {% if fear_greed.vix_current > fear_greed.vix_sma50 %}
+                  <span class="badge rounded-pill badge-bear px-2 py-1 mt-1">Extreme Fear</span>
+                  {% else %}
+                  <span class="badge rounded-pill badge-bull px-2 py-1 mt-1">Low Volatility</span>
+                  {% endif %}
+                {% endif %}
+              </div>
+              {% if fear_greed.vix_current %}
+              <div class="text-end">
+                <div class="fw-700" style="font-size: 1.3rem;">{{ fear_greed.vix_current }}</div>
+                <div class="text-muted small">50d MA: {{ fear_greed.vix_sma50 }}</div>
+              </div>
+              {% endif %}
+            </div>
+            <p class="text-muted small mb-2">
+              VIX and its 50-day moving average
+            </p>
+            <div id="vixChart" style="height: 220px;"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Historical Fear & Greed Chart -->
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5 class="section-label mb-2">Historical Fear & Greed</h5>
+        <div id="fgChart" style="height: 220px;"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endif %}
+
 <!-- Watchlist -->
 <section class="py-4 pb-5">
   <div class="container-fluid px-4 px-lg-5">
@@ -152,4 +250,118 @@
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+{% if fear_greed and fear_greed.score is not none %}
+<script>
+(function() {
+  // --- Semicircle Gauge ---
+  const canvas = document.getElementById('fgGauge');
+  if (!canvas) return;
+  const score = {{ fear_greed.score }};
+
+  function drawGauge(isDark) {
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H - 10;
+    const R = Math.min(cx, cy) - 10;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Gradient segments: Extreme Fear -> Fear -> Neutral -> Greed -> Extreme Greed
+    const segments = [
+      { end: 0.25, color: '#e63946' },
+      { end: 0.45, color: '#f4a261' },
+      { end: 0.55, color: '#6c757d' },
+      { end: 0.75, color: '#2a9d8f' },
+      { end: 1.00, color: '#1d8a7e' },
+    ];
+
+    let startAngle = Math.PI;
+    segments.forEach(seg => {
+      const endAngle = Math.PI + seg.end * Math.PI;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, startAngle, endAngle);
+      ctx.lineWidth = 18;
+      ctx.strokeStyle = seg.color;
+      ctx.lineCap = 'butt';
+      ctx.stroke();
+      startAngle = endAngle;
+    });
+
+    // Needle
+    const needleAngle = Math.PI + (score / 100) * Math.PI;
+    const needleLen = R - 25;
+    const nx = cx + needleLen * Math.cos(needleAngle);
+    const ny = cy + needleLen * Math.sin(needleAngle);
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(nx, ny);
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = isDark ? '#e2e8f0' : '#2b2d42';
+    ctx.stroke();
+
+    // Center dot
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, 2 * Math.PI);
+    ctx.fillStyle = isDark ? '#e2e8f0' : '#2b2d42';
+    ctx.fill();
+  }
+
+  const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+  drawGauge(isDark);
+
+  // Redraw on theme change
+  new MutationObserver(() => {
+    drawGauge(document.documentElement.getAttribute('data-bs-theme') === 'dark');
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme'] });
+
+  // --- Bootstrap tooltips ---
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(
+    el => new bootstrap.Tooltip(el)
+  );
+
+  // --- Dark mode helper ---
+  function syncDarkMode(el) {
+    new MutationObserver(() => {
+      const dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+      const bg = dark ? '#1a1d23' : '#ffffff';
+      const fontColor = dark ? '#e2e8f0' : '#2b2d42';
+      const gridColor = dark ? '#2d3248' : '#f0f0f0';
+      Plotly.relayout(el, {
+        plot_bgcolor: bg,
+        paper_bgcolor: bg,
+        'font.color': fontColor,
+        'xaxis.gridcolor': gridColor,
+        'yaxis.gridcolor': gridColor,
+      });
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme'] });
+  }
+
+  // --- Fear & Greed Chart ---
+  {% if fear_greed.chart_json %}
+  const chartData = {{ fear_greed.chart_json | safe }};
+  const fgEl = document.getElementById('fgChart');
+  Plotly.newPlot(fgEl, chartData.data, chartData.layout, {
+    responsive: true,
+    displayModeBar: false,
+  });
+  syncDarkMode(fgEl);
+  {% endif %}
+
+  // --- VIX Chart ---
+  {% if fear_greed.vix_chart_json %}
+  const vixData = {{ fear_greed.vix_chart_json | safe }};
+  const vixEl = document.getElementById('vixChart');
+  Plotly.newPlot(vixEl, vixData.data, vixData.layout, {
+    responsive: true,
+    displayModeBar: false,
+  });
+  syncDarkMode(vixEl);
+  {% endif %}
+})();
+</script>
+{% endif %}
 {% endblock %}
