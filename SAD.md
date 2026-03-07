@@ -93,14 +93,15 @@ app/
 │   ├── dashboard.py     # GET /, POST /watchlist/add, POST /watchlist/remove/{ticker}
 │   ├── analyze.py       # GET /analyze, POST /analyze (redirect)
 │   ├── sad.py           # GET /sad
-│   ├── help_route.py    # GET /help
+│   ├── help_route.py    # GET /help, GET /help/course
 │   └── health.py        # GET /health
 ├── templates/
 │   ├── base.html        # Navbar, dark mode, footer, CDN links
 │   ├── dashboard.html   # Market indices, watchlist, quick analyze
 │   ├── analyze.html     # Chart, outlook, signals, targets, levels
 │   ├── sad.html         # Rendered SAD.md with TOC sidebar
-│   └── help.html        # Murphy concepts accordion (includes Outlook Score explanation)
+│   ├── help.html        # Murphy concepts reference + course CTA
+│   └── course.html      # Progressive learning course (5 modules, 13 lessons)
 └── static/
     ├── css/main.css     # Design system, dark mode, component styles
     └── js/main.js       # Dark mode toggle, Plotly theme sync
@@ -122,6 +123,7 @@ SAD.md                   # This document
 | POST | `/watchlist/remove/{ticker}` | Remove ticker from watchlist |
 | GET | `/sad` | Rendered Software Architecture Document |
 | GET | `/help` | Murphy concepts reference |
+| GET | `/help/course` | Progressive learning course (5 modules, 13 lessons) |
 | GET | `/health` | `{"status":"healthy","timestamp":"…"}` |
 
 ### Analysis Engine Output

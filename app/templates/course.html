@@ -1,0 +1,1239 @@
+{% extends "base.html" %}
+{% block title %}Course — Murphy Trend{% endblock %}
+
+{% block head %}
+<style>
+  .course-hero {
+    background: linear-gradient(135deg, #2a9d8f18 0%, #277da118 100%);
+    border-bottom: 1px solid #e9ecef;
+  }
+  .module-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #2a9d8f1a;
+    color: #2a9d8f;
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .lesson-card {
+    border: 1px solid #e9ecef;
+    border-radius: 14px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 1.5rem;
+  }
+  .lesson-card-header {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .lesson-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #2a9d8f;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .lesson-body {
+    padding: 1.5rem;
+    font-size: 0.88rem;
+    color: #444;
+    line-height: 1.7;
+  }
+  .objectives-box {
+    border-left: 4px solid #2a9d8f;
+    background: #2a9d8f0d;
+    border-radius: 0 8px 8px 0;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1.25rem;
+  }
+  .objectives-box .objectives-title {
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #2a9d8f;
+    margin-bottom: 0.5rem;
+  }
+  .objectives-box ul {
+    padding-left: 1.1rem;
+    margin: 0;
+    color: #333;
+    font-size: 0.85rem;
+  }
+  .objectives-box ul li { margin-bottom: 0.25rem; }
+  .takeaways-box {
+    border-left: 4px solid #277da1;
+    background: #277da10d;
+    border-radius: 0 8px 8px 0;
+    padding: 0.9rem 1.1rem;
+    margin-top: 1.25rem;
+  }
+  .takeaways-box .takeaways-title {
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #277da1;
+    margin-bottom: 0.5rem;
+  }
+  .takeaways-box ul {
+    padding-left: 1.1rem;
+    margin: 0;
+    color: #333;
+    font-size: 0.85rem;
+  }
+  .takeaways-box ul li { margin-bottom: 0.25rem; }
+  .tryt-cta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding: 0.75rem 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    font-size: 0.85rem;
+  }
+  .tryt-cta .tryt-label { color: #666; }
+  .module-section {
+    margin-bottom: 2.5rem;
+  }
+  .module-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e9ecef;
+  }
+  .chapter-tag {
+    background: #277da11a;
+    color: #277da1;
+    border-radius: 20px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .progress-bar-custom {
+    height: 4px;
+    border-radius: 2px;
+    background: #e9ecef;
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #2a9d8f, #277da1);
+  }
+  /* Dark mode */
+  [data-bs-theme="dark"] .lesson-card {
+    background: var(--mt-card);
+    border-color: var(--mt-border);
+  }
+  [data-bs-theme="dark"] .lesson-card-header {
+    border-bottom-color: var(--mt-border);
+  }
+  [data-bs-theme="dark"] .lesson-body { color: #ccc; }
+  [data-bs-theme="dark"] .objectives-box { background: #2a9d8f18; }
+  [data-bs-theme="dark"] .objectives-box ul { color: #ddd; }
+  [data-bs-theme="dark"] .takeaways-box { background: #277da118; }
+  [data-bs-theme="dark"] .takeaways-box ul { color: #ddd; }
+  [data-bs-theme="dark"] .tryt-cta { background: #1e2124; border-color: var(--mt-border); }
+  [data-bs-theme="dark"] .module-heading { border-bottom-color: var(--mt-border); }
+  [data-bs-theme="dark"] .progress-bar-custom { background: #2a2e32; }
+  [data-bs-theme="dark"] .course-hero { border-bottom-color: var(--mt-border); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="course-hero py-5">
+  <div class="container-fluid px-4 px-lg-5">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7">
+        <p class="text-primary fw-600 mb-2 small text-uppercase">
+          <i class="bi bi-mortarboard me-1"></i>Stock Market Analysis Course
+        </p>
+        <h1 class="fw-700 display-5 mb-3" style="color:#2b2d42;">
+          Technical Analysis<br>from First Principles
+        </h1>
+        <p class="lead text-muted mb-4">
+          A structured course based on John J. Murphy's <em>Technical Analysis of the Financial Markets</em> —
+          the same indicators MurphyTrend runs automatically, explained from the ground up.
+          5 modules · 13 lessons · each with a live "Try it" example.
+        </p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="#module-1" class="btn btn-primary px-4">
+            <i class="bi bi-play-circle me-2"></i>Start Module 1
+          </a>
+          <a href="/help" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to Concepts
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="row g-3">
+          <div class="col-6"><div class="lesson-card p-3 text-center"><i class="bi bi-1-circle-fill fs-2 text-primary mb-1 d-block"></i><div class="fw-600 small">Foundations</div><div class="text-muted" style="font-size:0.78rem;">2 lessons</div></div></div>
+          <div class="col-6"><div class="lesson-card p-3 text-center"><i class="bi bi-2-circle-fill fs-2 text-primary mb-1 d-block"></i><div class="fw-600 small">Chart Patterns</div><div class="text-muted" style="font-size:0.78rem;">3 lessons</div></div></div>
+          <div class="col-6"><div class="lesson-card p-3 text-center"><i class="bi bi-3-circle-fill fs-2 text-primary mb-1 d-block"></i><div class="fw-600 small">Volume</div><div class="text-muted" style="font-size:0.78rem;">2 lessons</div></div></div>
+          <div class="col-6"><div class="lesson-card p-3 text-center"><i class="bi bi-4-circle-fill fs-2 text-primary mb-1 d-block"></i><div class="fw-600 small">MAs &amp; Bands</div><div class="text-muted" style="font-size:0.78rem;">2 lessons</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main layout: TOC + content -->
+<div class="container-fluid py-4 px-4 px-lg-5">
+  <div class="row">
+
+    <!-- TOC sidebar -->
+    <div class="col-lg-3 d-none d-lg-block">
+      <div class="toc-sidebar">
+        <div class="toc-header fw-600 small text-muted text-uppercase mb-3 px-2">
+          <i class="bi bi-list-ul me-1"></i>Contents
+        </div>
+        <nav id="toc-nav" class="toc-nav">
+          <!-- JS-generated from headings -->
+        </nav>
+      </div>
+    </div>
+
+    <!-- Course content -->
+    <div class="col-lg-9" id="course-body">
+
+      <!-- ===== MODULE 1: FOUNDATIONS ===== -->
+      <div class="module-section" id="module-1">
+        <div class="module-heading">
+          <span class="module-badge"><i class="bi bi-1-circle"></i>Module 1</span>
+          <h2 class="fw-700 mb-0 fs-4" style="color:#2b2d42;">Foundations</h2>
+          <span class="chapter-tag ms-auto">Ch. 1–4</span>
+        </div>
+
+        <!-- Lesson 1 -->
+        <div class="lesson-card" id="lesson-1">
+          <div class="lesson-card-header">
+            <div class="lesson-number">1</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">Trend &amp; Dow Theory</div>
+              <div class="text-muted" style="font-size:0.78rem;">The market has memory — learn to read it</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Define trend and explain Dow Theory's three trend types</li>
+                <li>Identify higher highs/higher lows in an uptrend (and their inverse in a downtrend)</li>
+                <li>Understand when a trend is considered broken vs. merely paused</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="dow-theory">What is Dow Theory?</h3>
+            <p>
+              Charles Dow observed in the early 1900s that markets don't move randomly — they move in
+              <strong>trends</strong>. Murphy built his entire framework on this insight. Dow Theory
+              identifies three simultaneous trend types:
+            </p>
+            <ul>
+              <li><strong>Primary trend</strong> (months to years) — the dominant bull or bear market. This is the tide.</li>
+              <li><strong>Secondary trend</strong> (weeks to months) — corrections and rallies within the primary trend. This is the wave.</li>
+              <li><strong>Minor trend</strong> (days) — daily price fluctuations. This is the ripple.</li>
+            </ul>
+            <p>
+              Murphy's rule of thumb: <em>"Never fight the primary trend."</em> Short-term noise is irrelevant
+              if you know which way the tide is running.
+            </p>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="higher-highs">Higher Highs &amp; Higher Lows</h3>
+            <p>
+              An <strong>uptrend</strong> is defined by a sequence of higher highs (HH) and higher lows (HL).
+              Each rally reaches a new peak; each pullback holds above the previous low. As long as this
+              pattern is intact, buyers are in control.
+            </p>
+            <p>
+              A <strong>downtrend</strong> is the mirror: lower highs (LH) and lower lows (LL). Each
+              bounce fails below the prior peak; each dip breaks the prior trough.
+            </p>
+            <p>
+              The trend is <em>broken</em> — not just paused — when the defining structure fails:
+              an uptrend ends when price makes a <strong>lower low</strong> for the first time.
+              That's the signal to reassess, not before.
+            </p>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="trendlines">Trendlines &amp; Channels</h3>
+            <p>
+              A <strong>trendline</strong> connects at least two swing lows (in an uptrend) or two swing
+              highs (in a downtrend). The more touches without a break, the more significant the line.
+              When price decisively penetrates the trendline — especially on high volume — the trend is
+              likely reversing.
+            </p>
+            <p>
+              A <strong>channel</strong> adds a parallel return line drawn from the peaks. Price oscillating
+              between support trendline and resistance channel line is a powerful, tradeable structure.
+            </p>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>Dow Theory: three trends (primary, secondary, minor) operating simultaneously</li>
+                <li>Uptrend = HH + HL; Downtrend = LH + LL</li>
+                <li>The trend is in force until the defining structure breaks — not just pauses</li>
+                <li>MurphyTrend's "Price Trend" signal (weight 1.5) detects this HH/HL structure automatically</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">See trend analysis in action:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=SPY" class="btn btn-sm btn-outline-primary">SPY</a>
+                <a href="/analyze?ticker=AAPL" class="btn btn-sm btn-outline-primary">AAPL</a>
+                <a href="/analyze?ticker=QQQ" class="btn btn-sm btn-outline-primary">QQQ</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lesson 2 -->
+        <div class="lesson-card" id="lesson-2">
+          <div class="lesson-card-header">
+            <div class="lesson-number">2</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">Support &amp; Resistance</div>
+              <div class="text-muted" style="font-size:0.78rem;">Price levels with memory</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Define support and resistance and explain why they form</li>
+                <li>Apply Murphy's role-reversal principle</li>
+                <li>Understand how these levels strengthen with repeated tests</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="support-resistance">Why Price Levels Have Memory</h3>
+            <p>
+              <strong>Support</strong> is a price level where buying pressure has historically been strong
+              enough to stop or reverse a decline. Think of it as a floor — the more times price has
+              bounced from this level, the more traders are watching it.
+            </p>
+            <p>
+              <strong>Resistance</strong> is the ceiling — a level where selling pressure has historically
+              capped rallies. Prior highs create resistance because investors who bought at the top are
+              relieved to break even and sell; traders who shorted earlier add more supply.
+            </p>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="role-reversal">Murphy's Role Reversal</h3>
+            <p>
+              One of Murphy's most powerful and reliable principles: <em>once a support level breaks,
+              it becomes resistance — and vice versa</em>. Why? The psychology flips:
+            </p>
+            <ul>
+              <li>Former buyers at the old support, now underwater, want to sell when price returns to that level to cut their loss</li>
+              <li>Short sellers who sold the breakdown defend the level from above</li>
+            </ul>
+            <p>
+              This role reversal is the basis for many of the best trade entries Murphy describes.
+              Watch for price to return to a broken level — the reaction there confirms whether the break was real.
+            </p>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="sr-strength">How Levels Strengthen</h3>
+            <p>
+              A support level tested three times and holding is stronger than one tested once.
+              The logic: each test attracts more traders who've seen the level hold, adding their buy
+              orders just below it. Conversely, a level broken after many tests carries more significance —
+              all those trapped buyers have now become potential sellers.
+            </p>
+            <p>
+              Volume is also key: a break of support on <strong>high volume</strong> is far more reliable
+              than a low-volume break, which might just be a temporary shake-out.
+            </p>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>Support = demand floor; Resistance = supply ceiling</li>
+                <li>Role reversal: broken support → new resistance (and vice versa)</li>
+                <li>More tests = stronger level, but also more explosive when it finally breaks</li>
+                <li>Always check volume when a key level breaks — low-volume breaks often reverse</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">See support/resistance levels on the chart:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=NVDA" class="btn btn-sm btn-outline-primary">NVDA</a>
+                <a href="/analyze?ticker=TSLA" class="btn btn-sm btn-outline-primary">TSLA</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== MODULE 2: CHART PATTERNS ===== -->
+      <div class="module-section" id="module-2">
+        <div class="module-heading">
+          <span class="module-badge"><i class="bi bi-2-circle"></i>Module 2</span>
+          <h2 class="fw-700 mb-0 fs-4" style="color:#2b2d42;">Chart Patterns</h2>
+          <span class="chapter-tag ms-auto">Ch. 5–6</span>
+        </div>
+
+        <!-- Lesson 3 -->
+        <div class="lesson-card" id="lesson-3">
+          <div class="lesson-card-header">
+            <div class="lesson-number">3</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">Reversal Patterns</div>
+              <div class="text-muted" style="font-size:0.78rem;">Head &amp; Shoulders, double &amp; triple tops/bottoms</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Identify Head &amp; Shoulders and understand its neckline mechanics</li>
+                <li>Recognize double and triple tops and bottoms as trend exhaustion signals</li>
+                <li>Calculate the measured-move price target from a reversal pattern</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="head-shoulders">Head &amp; Shoulders</h3>
+            <p>
+              Murphy considers this the most reliable of all reversal patterns. It forms at the end of an uptrend
+              with three peaks: a left shoulder, a higher central peak (the head), and a lower right shoulder.
+              The <strong>neckline</strong> connects the two troughs between the peaks.
+            </p>
+            <ul>
+              <li><strong>Signal:</strong> a decisive close below the neckline confirms the reversal</li>
+              <li><strong>Target:</strong> measure the height from neckline to the top of the head; project that distance downward from the neckline break</li>
+              <li><strong>Volume:</strong> should be highest on the left shoulder, lower on the head, even lower on the right shoulder — fading buying pressure</li>
+              <li><strong>Inverse H&amp;S</strong> is the bullish mirror, forming at the end of a downtrend</li>
+            </ul>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="double-tops">Double Tops &amp; Bottoms</h3>
+            <p>
+              A <strong>double top</strong> forms when price reaches the same resistance level twice, fails both times,
+              and then breaks below the trough between the two peaks (the "neckline" here). It signals that buyers
+              have exhausted the supply at that level — they tried twice and couldn't break through.
+            </p>
+            <p>
+              Key rule: the two peaks must be roughly equal in price (within ~3%). A break above a prior high,
+              even slightly, disqualifies the pattern as a double top.
+            </p>
+            <p>
+              A <strong>double bottom</strong> is the bullish inverse — the "W" pattern. Two tests of support,
+              with a break above the midpoint peak to confirm.
+            </p>
+            <p><strong>Triple tops and bottoms</strong> are rarer but even more powerful — three tests of the
+            same level with increasing conviction, then a clean break.</p>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>Head &amp; Shoulders: most reliable reversal; neckline break = entry signal</li>
+                <li>Measured-move target = height of pattern projected from breakout</li>
+                <li>Double tops require two near-equal highs + break of the trough between them</li>
+                <li>Volume should confirm: rising into the pattern, fading near the top/bottom</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">Check for active reversal patterns:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=META" class="btn btn-sm btn-outline-primary">META</a>
+                <a href="/analyze?ticker=AMZN" class="btn btn-sm btn-outline-primary">AMZN</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lesson 4 -->
+        <div class="lesson-card" id="lesson-4">
+          <div class="lesson-card-header">
+            <div class="lesson-number">4</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">Continuation Patterns</div>
+              <div class="text-muted" style="font-size:0.78rem;">Flags, pennants, triangles, rectangles</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Distinguish continuation patterns from reversal patterns</li>
+                <li>Identify flags, pennants, and the three types of triangle</li>
+                <li>Apply the measured-move rule to project continuation targets</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="flags-pennants">Flags &amp; Pennants</h3>
+            <p>
+              Flags and pennants form after a sharp, nearly vertical price move (the "flagpole") and represent
+              a brief, orderly consolidation before the trend resumes. They are among the <strong>most
+              reliable and consistent</strong> patterns in Murphy's toolkit.
+            </p>
+            <ul>
+              <li><strong>Flag:</strong> consolidation in a small rectangular channel, often slanting slightly against the prior trend. Usually lasts 1–3 weeks.</li>
+              <li><strong>Pennant:</strong> converging trendlines (a small symmetrical triangle) after the flagpole. Similar duration.</li>
+              <li><strong>Target:</strong> project the length of the flagpole from the breakout of the flag/pennant</li>
+              <li><strong>Volume:</strong> typically dries up during the consolidation, then surges on breakout</li>
+            </ul>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="triangles">Triangles</h3>
+            <p>Triangles come in three varieties, each with a different implication:</p>
+            <ul>
+              <li><strong>Symmetrical triangle:</strong> converging highs and lows — a neutral coil that typically resolves in the direction of the prior trend. Breakout direction = signal.</li>
+              <li><strong>Ascending triangle:</strong> flat top resistance, rising lows. Bullish bias — buyers are consistently willing to pay more while sellers are stuck at the same ceiling. Breaks up most often.</li>
+              <li><strong>Descending triangle:</strong> flat bottom support, declining highs. Bearish bias — sellers are consistently pressing lower while buyers defend the same floor. Breaks down most often.</li>
+            </ul>
+            <p>Target for any triangle: measure the height of the widest part of the triangle, then project that distance from the breakout point.</p>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="rectangles">Rectangles</h3>
+            <p>
+              A <strong>rectangle</strong> (or trading range) forms when price oscillates between two
+              clearly defined horizontal support and resistance levels. The breakout direction typically
+              continues the prior trend, but the rectangle can also serve as a reversal pattern — watch
+              the volume and broader trend context.
+            </p>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>Continuation patterns = temporary pauses, not reversals; trade in the direction of the prior trend</li>
+                <li>Flags/pennants: most reliable; target = flagpole length projected from breakout</li>
+                <li>Ascending triangle = bullish; descending = bearish; symmetrical = neutral (follow trend)</li>
+                <li>Volume confirmation is critical — dry on consolidation, explosive on breakout</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">Look for triangles and flags:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=MSFT" class="btn btn-sm btn-outline-primary">MSFT</a>
+                <a href="/analyze?ticker=GOOGL" class="btn btn-sm btn-outline-primary">GOOGL</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lesson 5 -->
+        <div class="lesson-card" id="lesson-5">
+          <div class="lesson-card-header">
+            <div class="lesson-number">5</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">Gaps &amp; Key Reversal Days</div>
+              <div class="text-muted" style="font-size:0.78rem;">What blank space on a chart tells you</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Distinguish between the three types of price gaps and their implications</li>
+                <li>Identify key reversal days and understand the psychological shift they represent</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="gaps">The Three Types of Gaps</h3>
+            <p>
+              A <strong>gap</strong> occurs when today's opening price is above yesterday's high (gap up)
+              or below yesterday's low (gap down), leaving an empty space on the chart. Not all gaps are equal:
+            </p>
+            <ul>
+              <li><strong>Breakaway gap:</strong> occurs at the beginning of a new trend, often breaking out of a consolidation area on high volume. The most significant — it marks the start of a major move. Gaps of this type rarely fill quickly.</li>
+              <li><strong>Runaway gap (measuring gap):</strong> occurs in the middle of a strong trend — price gaps in the trend direction with no nearby resistance. Murphy notes it often occurs near the midpoint of the move, making it useful for estimating the target.</li>
+              <li><strong>Exhaustion gap:</strong> appears near the end of a trend — price gaps far in the direction of the trend on high volume, but momentum is nearly spent. It's often followed within days by a sharp reversal. When an exhaustion gap is followed by a gap in the opposite direction, the combination is called an "island reversal."</li>
+            </ul>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="key-reversals">Key Reversal Days</h3>
+            <p>
+              A <strong>key reversal day</strong> signals a potential trend change in a single session. Murphy's criteria:
+            </p>
+            <ul>
+              <li><strong>Bearish key reversal:</strong> price makes a new high for the current move, then reverses to close below the prior day's close — all in the same session. Buying exhaustion.</li>
+              <li><strong>Bullish key reversal:</strong> price makes a new low for the move, then reverses to close above the prior day's close. Selling exhaustion.</li>
+            </ul>
+            <p>
+              The higher the volume on the reversal day, the more significant the signal. Key reversal days on
+              weekly or monthly charts carry far more weight than daily ones.
+            </p>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>Breakaway gap = trend beginning (high volume, rarely filled quickly)</li>
+                <li>Runaway gap = trend midpoint — useful for measuring the target</li>
+                <li>Exhaustion gap = trend ending — watch for reversal within days</li>
+                <li>Key reversal day: new extreme for the move, then closes against the trend — strongest on high volume</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">Check gap and reversal detection:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=TSLA" class="btn btn-sm btn-outline-primary">TSLA</a>
+                <a href="/analyze?ticker=NVDA" class="btn btn-sm btn-outline-primary">NVDA</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== MODULE 3: VOLUME ===== -->
+      <div class="module-section" id="module-3">
+        <div class="module-heading">
+          <span class="module-badge"><i class="bi bi-3-circle"></i>Module 3</span>
+          <h2 class="fw-700 mb-0 fs-4" style="color:#2b2d42;">Volume</h2>
+          <span class="chapter-tag ms-auto">Ch. 7</span>
+        </div>
+
+        <!-- Lesson 6 -->
+        <div class="lesson-card" id="lesson-6">
+          <div class="lesson-card-header">
+            <div class="lesson-number">6</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">Volume Confirmation</div>
+              <div class="text-muted" style="font-size:0.78rem;">Is smart money behind this move?</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>State Murphy's core volume rule and explain why it matters</li>
+                <li>Identify volume divergences that warn of weakening trends</li>
+                <li>Understand how volume confirms pattern breakouts</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="volume-rule">Murphy's Core Volume Rule</h3>
+            <p>
+              Murphy states it simply: <em>"Volume should expand in the direction of the price trend."</em>
+              This rule is the foundation for all volume analysis. It asks whether institutional
+              (large, "smart money") participants are behind the move or not.
+            </p>
+            <ul>
+              <li><strong>Rising price + rising volume</strong> = healthy uptrend. Institutional buyers are participating. The move has conviction.</li>
+              <li><strong>Rising price + falling volume</strong> = warning sign. The rally is losing participation. Distribution (smart money selling to retail buyers) is often occurring.</li>
+              <li><strong>Falling price + rising volume</strong> = selling pressure is heavy. Bears in control. A breakdown on high volume is a strong bearish signal.</li>
+              <li><strong>Falling price + falling volume</strong> = selling is drying up. The decline may be near exhaustion — watch for a bounce.</li>
+            </ul>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="volume-breakouts">Volume and Breakouts</h3>
+            <p>
+              Volume confirmation is most critical at breakout points. A price breaking above resistance
+              on <strong>2× or more of average volume</strong> is a high-confidence signal — it means
+              buyers overwhelmed sellers decisively. A breakout on below-average volume is suspect and
+              often fails (a "false breakout" or "bull trap").
+            </p>
+            <p>
+              Murphy's checklist for a valid breakout:
+            </p>
+            <ul>
+              <li>Price closes above (or below for breakdowns) the level</li>
+              <li>Volume expands significantly on the breakout day</li>
+              <li>Price doesn't immediately pull back through the level (role reversal holds)</li>
+            </ul>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>Volume expands in the trend direction = healthy; contracts = warning</li>
+                <li>Rising price + falling volume = distribution; be cautious</li>
+                <li>Breakouts need volume confirmation — low-volume breaks often fail</li>
+                <li>MurphyTrend's "Volume Trend" signal (weight 1.0) captures 20-day volume slope vs. 50-day average</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">Examine volume signals:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=SPY" class="btn btn-sm btn-outline-primary">SPY</a>
+                <a href="/analyze?ticker=XLF" class="btn btn-sm btn-outline-primary">XLF</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lesson 7 -->
+        <div class="lesson-card" id="lesson-7">
+          <div class="lesson-card-header">
+            <div class="lesson-number">7</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">On-Balance Volume (OBV)</div>
+              <div class="text-muted" style="font-size:0.78rem;">The leading volume indicator</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Explain how OBV is calculated and what it measures</li>
+                <li>Use OBV divergence to anticipate price reversals</li>
+                <li>Understand why OBV is a leading (not lagging) indicator</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="obv-calculation">How OBV Works</h3>
+            <p>
+              OBV (developed by Joe Granville, popularized by Murphy) is a running cumulative total:
+            </p>
+            <ul>
+              <li>On <strong>up days</strong> (close &gt; prior close): add that day's volume to the running total</li>
+              <li>On <strong>down days</strong> (close &lt; prior close): subtract that day's volume</li>
+            </ul>
+            <p>
+              The result is a single line that tracks whether volume is flowing <em>into</em> or <em>out of</em>
+              a stock. The absolute number is meaningless — only the <strong>direction and trend</strong> of OBV
+              matter.
+            </p>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="obv-divergence">OBV as a Leading Indicator</h3>
+            <p>
+              Murphy's key insight: <em>OBV often leads price</em>. When institutions start accumulating
+              a stock (buying quietly without moving the price much), volume on up days builds while the
+              price consolidates. OBV rises before the price breakout signals it.
+            </p>
+            <p>The most important OBV signals are divergences:</p>
+            <ul>
+              <li><strong>Bullish divergence:</strong> price makes a new low but OBV holds above its prior low — selling pressure is weakening. Smart money is absorbing the sell-off. A rally often follows.</li>
+              <li><strong>Bearish divergence:</strong> price makes a new high but OBV fails to confirm — buying volume is drying up despite the new high. A reversal is likely near.</li>
+            </ul>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>OBV = running cumulative volume: add on up days, subtract on down days</li>
+                <li>Rising OBV = accumulation (smart money buying); falling = distribution</li>
+                <li>OBV divergence is a leading signal — often moves before price</li>
+                <li>MurphyTrend's OBV signal (weight 1.0) checks whether OBV trend aligns with price trend</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">See OBV signal in the analysis:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=AAPL" class="btn btn-sm btn-outline-primary">AAPL</a>
+                <a href="/analyze?ticker=AMD" class="btn btn-sm btn-outline-primary">AMD</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== MODULE 4: MAs & BANDS ===== -->
+      <div class="module-section" id="module-4">
+        <div class="module-heading">
+          <span class="module-badge"><i class="bi bi-4-circle"></i>Module 4</span>
+          <h2 class="fw-700 mb-0 fs-4" style="color:#2b2d42;">Moving Averages &amp; Bollinger Bands</h2>
+          <span class="chapter-tag ms-auto">Ch. 9</span>
+        </div>
+
+        <!-- Lesson 8 -->
+        <div class="lesson-card" id="lesson-8">
+          <div class="lesson-card-header">
+            <div class="lesson-number">8</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">Moving Averages</div>
+              <div class="text-muted" style="font-size:0.78rem;">The 50-day, 200-day, and the golden/death cross</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Explain what a simple moving average smooths out and why it's useful</li>
+                <li>Distinguish the significance of the 50-day vs. 200-day MA</li>
+                <li>Define the golden cross and death cross and their implications</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="ma-basics">Moving Averages — Trend Filters</h3>
+            <p>
+              A <strong>simple moving average (SMA)</strong> is the average closing price over N days, recalculated
+              each day as the oldest price drops off and the newest is added. It smooths out daily noise to reveal
+              the underlying trend direction.
+            </p>
+            <p>Murphy's two most important SMAs:</p>
+            <ul>
+              <li><strong>50-day SMA:</strong> intermediate-term trend benchmark. Price consistently above the 50-day = bullish intermediate outlook. Price crossing below = caution. Used by institutional traders to gauge medium-term momentum.</li>
+              <li><strong>200-day SMA:</strong> the long-term benchmark — the most closely watched MA on Wall Street. In a healthy bull market, the 200-day slopes upward and price stays above it. A break below the 200-day on a major index is a serious warning.</li>
+            </ul>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="golden-death-cross">The Golden Cross &amp; Death Cross</h3>
+            <p>
+              The <strong>golden cross</strong> occurs when the 50-day SMA crosses <em>above</em> the 200-day SMA.
+              Murphy regards this as one of the most significant long-term bullish signals — it marks the
+              transition from a bear trend to a bull trend in the price structure. MurphyTrend assigns it
+              the highest weight in the outlook score: <strong>2.0</strong>.
+            </p>
+            <p>
+              The <strong>death cross</strong> is the inverse — 50-day crosses <em>below</em> the 200-day.
+              A major bearish signal. Historically, death crosses have preceded extended bear phases in indices
+              like the S&amp;P 500. Equally weighted at 2.0 due to the structural significance of the transition.
+            </p>
+            <p>
+              Important nuance: both crosses are <em>lagging</em> by nature — they confirm a trend change that
+              has already begun, not predict one. Their value is in filtering out whipsaws and confirming the
+              direction for longer-term positioning.
+            </p>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>50-day MA = intermediate trend; 200-day MA = long-term benchmark</li>
+                <li>Price above MA = bullish; below = bearish (at the respective time frame)</li>
+                <li>Golden cross (50 above 200) = major bullish signal; death cross = major bearish</li>
+                <li>Weight 2.0 in MurphyTrend's score — highest of any single signal</li>
+                <li>MAs are lagging; use them for trend confirmation, not entry precision</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">Check golden/death cross status:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=SPY" class="btn btn-sm btn-outline-primary">SPY</a>
+                <a href="/analyze?ticker=BRK-B" class="btn btn-sm btn-outline-primary">BRK-B</a>
+                <a href="/analyze?ticker=NVDA" class="btn btn-sm btn-outline-primary">NVDA</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lesson 9 -->
+        <div class="lesson-card" id="lesson-9">
+          <div class="lesson-card-header">
+            <div class="lesson-number">9</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">Bollinger Bands (20, 2)</div>
+              <div class="text-muted" style="font-size:0.78rem;">Volatility-adjusted price ranges</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Explain how Bollinger Bands are constructed and what %B measures</li>
+                <li>Identify band squeezes and their implication for volatility</li>
+                <li>Distinguish overbought/oversold signals in trending vs. ranging markets</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="bb-construction">How Bollinger Bands Are Built</h3>
+            <p>
+              Bollinger Bands place a volatility envelope around price using three lines:
+            </p>
+            <ul>
+              <li><strong>Middle band:</strong> 20-day simple moving average</li>
+              <li><strong>Upper band:</strong> middle band + (2 × 20-day standard deviation)</li>
+              <li><strong>Lower band:</strong> middle band − (2 × 20-day standard deviation)</li>
+            </ul>
+            <p>
+              Statistically, approximately 95% of price action should fall within the bands. When price
+              touches or breaches a band, it represents a statistically extreme price level relative to
+              recent history.
+            </p>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="bb-signals">Reading the Bands</h3>
+            <p><strong>%B</strong> (percent-B) measures where price is relative to the bands: 1.0 = upper band, 0.0 = lower band, 0.5 = middle.</p>
+            <ul>
+              <li><strong>%B &gt; 0.8</strong> → price near upper band (MurphyTrend: bearish signal in non-trending markets)</li>
+              <li><strong>%B &lt; 0.2</strong> → price near lower band (bullish signal — potential support)</li>
+              <li><strong>Band squeeze:</strong> when bands narrow to their tightest point in months, volatility is at a low ebb — a large move is imminent. The direction of the first significant breakout is the trade signal.</li>
+              <li><strong>In strong trends:</strong> price can "ride" the upper (or lower) band for an extended period. Band touches in a strong trend mean continuation, not reversal.</li>
+            </ul>
+            <p>
+              Context is everything with Bollinger Bands — always check whether price is trending
+              or ranging before interpreting an upper/lower band touch.
+            </p>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>Bands = 20-day SMA ± 2 standard deviations; adapt to volatility automatically</li>
+                <li>%B &gt; 0.8 = upper band (overbought in range); %B &lt; 0.2 = lower band (oversold)</li>
+                <li>Band squeeze (narrow bands) = expect a big breakout soon</li>
+                <li>In strong trends, price rides the band — don't blindly fade upper/lower touches</li>
+                <li>MurphyTrend's %B signal (weight 1.0) uses these thresholds directly</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">See Bollinger Bands in action:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=AAPL" class="btn btn-sm btn-outline-primary">AAPL</a>
+                <a href="/analyze?ticker=GLD" class="btn btn-sm btn-outline-primary">GLD</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== MODULE 5: OSCILLATORS & TARGETS ===== -->
+      <div class="module-section" id="module-5">
+        <div class="module-heading">
+          <span class="module-badge"><i class="bi bi-5-circle"></i>Module 5</span>
+          <h2 class="fw-700 mb-0 fs-4" style="color:#2b2d42;">Oscillators &amp; Price Targets</h2>
+          <span class="chapter-tag ms-auto">Ch. 10, 13</span>
+        </div>
+
+        <!-- Lesson 10 -->
+        <div class="lesson-card" id="lesson-10">
+          <div class="lesson-card-header">
+            <div class="lesson-number">10</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">RSI — Relative Strength Index</div>
+              <div class="text-muted" style="font-size:0.78rem;">Measuring momentum on a 0–100 scale</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Calculate RSI conceptually and explain what it measures</li>
+                <li>Apply the 30/70 overbought-oversold zones</li>
+                <li>Identify bullish and bearish RSI divergences</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="rsi-how">How RSI Works</h3>
+            <p>
+              RSI(14) measures momentum: it compares the average gain over 14 days to the average loss,
+              normalizing the result to a 0–100 scale. The formula ensures RSI can never actually reach
+              0 or 100 but approaches those extremes under relentless buying or selling.
+            </p>
+            <ul>
+              <li><strong>RSI &gt; 70:</strong> overbought. Price has moved up faster than the historical norm. In trending markets, this can persist — use as a warning, not an automatic sell signal.</li>
+              <li><strong>RSI &lt; 30:</strong> oversold. Price has fallen faster than the norm. Again, in strong downtrends, RSI can stay below 30 for weeks.</li>
+              <li><strong>RSI = 50:</strong> momentum is neutral — neither buyers nor sellers have a clear edge</li>
+            </ul>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="rsi-divergence">RSI Divergence — The Most Powerful Signal</h3>
+            <p>
+              Murphy emphasizes divergence as the most reliable RSI signal — more so than the overbought/oversold levels alone:
+            </p>
+            <ul>
+              <li><strong>Bullish divergence:</strong> price makes a <em>lower low</em>, but RSI makes a <em>higher low</em>. Downward momentum is weakening even though price is still falling — a reversal is often near.</li>
+              <li><strong>Bearish divergence:</strong> price makes a <em>higher high</em>, but RSI makes a <em>lower high</em>. Upward momentum is fading even though price is still rising — the top may be close.</li>
+            </ul>
+            <p>
+              Divergences are most significant when they occur at extreme RSI levels (&lt;30 or &gt;70) and
+              when supported by other indicators (volume, patterns, MA context).
+            </p>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>RSI(14): 0–100 momentum scale; &gt;70 = overbought, &lt;30 = oversold</li>
+                <li>In strong trends, overbought/oversold can persist — don't trade against the trend on RSI alone</li>
+                <li>Divergence is the strongest RSI signal — price and momentum disagree</li>
+                <li>MurphyTrend's RSI signal (weight 1.5) uses these levels plus divergence detection</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">Inspect RSI signals:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=TSLA" class="btn btn-sm btn-outline-primary">TSLA</a>
+                <a href="/analyze?ticker=NVDA" class="btn btn-sm btn-outline-primary">NVDA</a>
+                <a href="/analyze?ticker=SPY" class="btn btn-sm btn-outline-primary">SPY</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lesson 11 -->
+        <div class="lesson-card" id="lesson-11">
+          <div class="lesson-card-header">
+            <div class="lesson-number">11</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">MACD (12, 26, 9)</div>
+              <div class="text-muted" style="font-size:0.78rem;">Trend-following meets momentum</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Explain the three components of MACD: line, signal, and histogram</li>
+                <li>Identify signal-line crosses and zero-line crosses</li>
+                <li>Use the histogram to gauge momentum acceleration vs. deceleration</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="macd-components">The Three MACD Components</h3>
+            <p>
+              MACD was designed by Gerald Appel to combine trend-following and momentum in a single indicator.
+              Murphy adopted it as one of his primary tools. Three components:
+            </p>
+            <ul>
+              <li><strong>MACD line:</strong> 12-day EMA minus 26-day EMA. Positive when short-term momentum leads long-term (bullish); negative when lagging (bearish).</li>
+              <li><strong>Signal line:</strong> 9-day EMA of the MACD line — a smoothed version that generates crossover signals</li>
+              <li><strong>Histogram:</strong> MACD line minus signal line. Growing bars = momentum accelerating in the direction of the MACD; shrinking bars = fading</li>
+            </ul>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="macd-signals">Reading MACD Signals</h3>
+            <ul>
+              <li><strong>Signal line cross (bullish):</strong> MACD line crosses above its signal line — short-term momentum is picking up relative to the smoothed signal. MurphyTrend weight: 1.5.</li>
+              <li><strong>Signal line cross (bearish):</strong> MACD drops below signal — momentum fading.</li>
+              <li><strong>Zero line cross:</strong> MACD crossing above zero confirms the 12-day EMA has overtaken the 26-day (bullish trend confirmation). Crossing below = bearish confirmation. Less frequent, but higher significance than signal crosses.</li>
+              <li><strong>Histogram divergence:</strong> if price makes a new high but the histogram peak is lower than the prior peak, momentum is waning — a bearish divergence. Strongest when combined with an RSI divergence.</li>
+            </ul>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>MACD = 12-EMA minus 26-EMA; signal = 9-EMA of MACD; histogram = MACD − signal</li>
+                <li>Signal cross: MACD above signal = bullish; below = bearish (weight 1.5)</li>
+                <li>Zero line cross = stronger, trend-level confirmation</li>
+                <li>Histogram shrinking before a cross = early warning; growing = trend strengthening</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">Examine MACD signals:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=AAPL" class="btn btn-sm btn-outline-primary">AAPL</a>
+                <a href="/analyze?ticker=MSFT" class="btn btn-sm btn-outline-primary">MSFT</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lesson 12 -->
+        <div class="lesson-card" id="lesson-12">
+          <div class="lesson-card-header">
+            <div class="lesson-number">12</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">Fibonacci Retracements &amp; Extensions</div>
+              <div class="text-muted" style="font-size:0.78rem;">The mathematics of market structure</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Explain why Fibonacci ratios appear in market structure</li>
+                <li>Apply the 38.2%, 50%, and 61.8% retracement levels to a swing</li>
+                <li>Use Fibonacci extensions to project price targets</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="fib-ratios">Why Fibonacci Works in Markets</h3>
+            <p>
+              The Fibonacci sequence (1, 1, 2, 3, 5, 8, 13, 21…) produces ratios that appear throughout
+              nature — and, Murphy argues, in human crowd behavior. The key ratios are:
+            </p>
+            <ul>
+              <li><strong>61.8%</strong> — the "golden ratio" (each number is ~61.8% of the next)</li>
+              <li><strong>38.2%</strong> — the complement of 61.8% (i.e., 100% − 61.8%)</li>
+              <li><strong>50.0%</strong> — not a Fibonacci number, but widely used (Dow Theory's "half-way" rule)</li>
+            </ul>
+            <p>
+              Whether these ratios "work" due to self-fulfilling prophecy or something deeper, enough traders
+              watch them that they become significant price levels where decisions cluster.
+            </p>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="fib-retracements">Retracements</h3>
+            <p>
+              After a significant price move, markets typically retrace (pull back) a fraction of that move
+              before resuming the trend. Murphy's retracement hierarchy:
+            </p>
+            <ul>
+              <li><strong>33% (or 38.2%):</strong> shallow pullback — the underlying trend is very strong. Price bouncing here signals the move is far from over.</li>
+              <li><strong>50%:</strong> the most common retracement depth. A bounce from 50% is the classic "buy the dip" opportunity in a bull market.</li>
+              <li><strong>61.8%:</strong> the deepest normal pullback. A bounce here, in the context of a strong prior trend, is a high-probability entry. A <em>break below</em> 61.8% often signals a trend reversal, not just a retracement.</li>
+              <li><strong>66% (or 2/3):</strong> Murphy also uses this simpler approximation — break below 2/3 of the prior move reversal territory.</li>
+            </ul>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="fib-extensions">Extensions for Price Targets</h3>
+            <p>
+              Fibonacci extensions project how far a move may travel beyond its prior high (in an uptrend):
+            </p>
+            <ul>
+              <li><strong>100% extension:</strong> the minimum measured-move target — the market "expects" the move to be at least equal to the prior swing</li>
+              <li><strong>138.2% / 161.8%:</strong> extended targets for strong trending moves</li>
+            </ul>
+            <p>
+              MurphyTrend uses these extension levels as clamps on the 30/60/90-day price target projections,
+              anchoring them to the nearest Fibonacci level to avoid unrealistic projections.
+            </p>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>Retracements: 38.2% = shallow, 50% = common, 61.8% = deep; break below 61.8% = reversal warning</li>
+                <li>Extensions: 100% = minimum measured move, 161.8% = extended target</li>
+                <li>Use multiple Fibonacci levels together — confluences (e.g., 50% retracement + prior support) are the strongest</li>
+                <li>MurphyTrend's 30/60/90-day targets are clamped to Fibonacci extension levels from the most recent swing</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">See Fibonacci-based price targets:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=SPY" class="btn btn-sm btn-outline-primary">SPY</a>
+                <a href="/analyze?ticker=AAPL" class="btn btn-sm btn-outline-primary">AAPL</a>
+                <a href="/analyze?ticker=BTC-USD" class="btn btn-sm btn-outline-primary">BTC-USD</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lesson 13 -->
+        <div class="lesson-card" id="lesson-13">
+          <div class="lesson-card-header">
+            <div class="lesson-number">13</div>
+            <div>
+              <div class="fw-700" style="color:#2b2d42;">Scoring &amp; Price Targets</div>
+              <div class="text-muted" style="font-size:0.78rem;">Putting it all together</div>
+            </div>
+          </div>
+          <div class="lesson-body">
+            <div class="objectives-box">
+              <div class="objectives-title"><i class="bi bi-bullseye me-1"></i>Learning Objectives</div>
+              <ul>
+                <li>Understand how MurphyTrend aggregates all signals into a single weighted score</li>
+                <li>Interpret the 30/60/90-day price targets in the context of the outlook score</li>
+                <li>Build a decision framework for reading a complete Murphy analysis</li>
+              </ul>
+            </div>
+
+            <h3 class="fw-600 fs-6 mb-2" id="scoring-system">The Weighted Scoring System</h3>
+            <p>
+              MurphyTrend converts every indicator into a direction score (+1 bullish, 0 neutral, −1 bearish)
+              and multiplies by its weight. The final outlook is the weighted average:
+            </p>
+            <div class="p-3 rounded-3 mb-3" style="background:#2a9d8f12; font-family:monospace; font-size:0.88rem;">
+              outlook_score = Σ(signal_direction × weight) ÷ Σ(all_weights)
+            </div>
+            <p>The weights by signal:</p>
+            <ul style="font-size:0.85rem;">
+              <li><strong>Golden/Death Cross — 2.0</strong> (highest; long-term structural shift)</li>
+              <li><strong>Price Trend (HH/HL) — 1.5</strong> (Dow Theory primary structure)</li>
+              <li><strong>RSI(14) — 1.5</strong> (momentum extremes and divergence)</li>
+              <li><strong>MACD Signal Cross — 1.5</strong> (trend + momentum confirmation)</li>
+              <li><strong>Price vs. 50-day MA — 1.0</strong></li>
+              <li><strong>Price vs. 200-day MA — 1.0</strong></li>
+              <li><strong>MACD Histogram — 1.0</strong></li>
+              <li><strong>Bollinger %B — 1.0</strong></li>
+              <li><strong>Volume Trend — 1.0</strong></li>
+              <li><strong>OBV — 1.0</strong></li>
+              <li><strong>Chart Patterns — 1.0–1.5 each</strong> (when detected)</li>
+            </ul>
+
+            <h3 class="fw-600 fs-6 mb-2 mt-3" id="reading-results">Reading a Complete Analysis</h3>
+            <p>Murphy's framework synthesized into a reading checklist:</p>
+            <ul>
+              <li><strong>Step 1 — Check the primary trend.</strong> Is price making HH/HL or LH/LL? Is it above or below the 200-day MA? These establish the dominant context.</li>
+              <li><strong>Step 2 — Check the golden/death cross.</strong> Weight 2.0 — this single signal can dominate a neutral outlook. If it's present, it matters most.</li>
+              <li><strong>Step 3 — Count the signal agreement.</strong> If 7+ signals point the same direction, the thesis is strong. Mixed signals = uncertain, not "neutral do nothing."</li>
+              <li><strong>Step 4 — Check momentum (RSI + MACD).</strong> Is momentum confirming or diverging from price? Divergences are early warnings.</li>
+              <li><strong>Step 5 — Read the price targets in context.</strong> A bullish target with a bearish score = caution. A bearish target near strong support = potential opportunity. Never read targets without the score.</li>
+            </ul>
+
+            <div class="takeaways-box">
+              <div class="takeaways-title"><i class="bi bi-key me-1"></i>Key Takeaways</div>
+              <ul>
+                <li>Outlook score = weighted average of all signals; range −1.0 to +1.0</li>
+                <li>Golden/death cross (weight 2.0) is the single most impactful signal</li>
+                <li>Read score + targets together — a mismatch is itself information</li>
+                <li>Strong signal agreement (&gt;70% one direction) is more reliable than a borderline score</li>
+                <li>Technical analysis is probabilistic, not deterministic — always use alongside fundamental research and risk management</li>
+              </ul>
+            </div>
+            <div class="tryt-cta">
+              <i class="bi bi-play-circle-fill text-primary fs-5"></i>
+              <span class="tryt-label">Run a complete Murphy analysis:</span>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/analyze?ticker=AAPL" class="btn btn-sm btn-outline-primary">AAPL</a>
+                <a href="/analyze?ticker=SPY" class="btn btn-sm btn-outline-primary">SPY</a>
+                <a href="/analyze?ticker=NVDA" class="btn btn-sm btn-outline-primary">NVDA</a>
+                <a href="/analyze?ticker=TSLA" class="btn btn-sm btn-outline-primary">TSLA</a>
+                <a href="/analyze" class="btn btn-sm btn-primary">Your ticker →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer CTA -->
+      <div class="card border-0 shadow-sm rounded-3 p-5 text-center mb-4" style="background: linear-gradient(135deg, #2a9d8f12, #277da112);">
+        <i class="bi bi-mortarboard-fill text-primary mb-3" style="font-size:2.5rem;"></i>
+        <h4 class="fw-700 mb-2">Course Complete</h4>
+        <p class="text-muted mb-4 mx-auto" style="max-width:500px;">
+          You've covered all 5 modules. Now apply what you've learned — run a full Murphy analysis on any stock
+          and read every signal with fresh eyes.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+          <a href="/analyze" class="btn btn-primary px-4"><i class="bi bi-bar-chart-line me-2"></i>Analyse a Stock</a>
+          <a href="/help" class="btn btn-outline-secondary"><i class="bi bi-book me-2"></i>Concepts Reference</a>
+        </div>
+      </div>
+
+    </div><!-- /col-lg-9 -->
+  </div><!-- /row -->
+</div><!-- /container -->
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Build TOC from headings
+(function() {
+  const body = document.getElementById('course-body');
+  const nav = document.getElementById('toc-nav');
+  if (!body || !nav) return;
+
+  const headings = body.querySelectorAll('h2, h3');
+  if (!headings.length) return;
+
+  headings.forEach((h, i) => {
+    if (!h.id) h.id = 'heading-' + i;
+    const level = parseInt(h.tagName[1]);
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    a.className = 'toc-link toc-h' + level;
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById(h.id).scrollIntoView({ behavior: 'smooth' });
+    });
+    nav.appendChild(a);
+  });
+
+  // Scrollspy
+  const links = nav.querySelectorAll('.toc-link');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = nav.querySelector(`a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+
+  headings.forEach(h => observer.observe(h));
+})();
+</script>
+{% endblock %}
