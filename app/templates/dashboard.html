@@ -162,91 +162,20 @@
 </section>
 {% endif %}
 
-<!-- Watchlist -->
+<!-- Quick Analyze -->
 <section class="py-4 pb-5">
   <div class="container-fluid px-4 px-lg-5">
-    <div class="row g-4">
-
-      <!-- Watchlist -->
-      <div class="col-lg-6">
-        <div class="card h-100">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="fw-600"><i class="bi bi-star me-2 text-warning"></i>Watchlist</span>
-            <span class="badge bg-secondary rounded-pill">{{ watchlist|length }}</span>
-          </div>
-          <div class="card-body p-0">
-            {% if watchlist %}
-            <ul class="list-group list-group-flush">
-              {% for item in watchlist %}
-              <li class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
-                <div>
-                  <a href="/analyze?ticker={{ item.ticker }}" class="fw-600 text-decoration-none ticker-link">
-                    {{ item.ticker }}
-                  </a>
-                  {% if item.name %}<span class="text-muted small ms-2">{{ item.name }}</span>{% endif %}
-                </div>
-                <div class="d-flex gap-2">
-                  <a href="/analyze?ticker={{ item.ticker }}" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-bar-chart-line"></i>
-                  </a>
-                  <form action="/watchlist/remove/{{ item.ticker }}" method="post" class="d-inline">
-                    <button class="btn btn-sm btn-outline-danger" type="submit">
-                      <i class="bi bi-trash3"></i>
-                    </button>
-                  </form>
-                </div>
-              </li>
-              {% endfor %}
-            </ul>
-            {% else %}
-            <div class="p-4 text-center text-muted">
-              <i class="bi bi-star fs-2 d-block mb-2"></i>
-              <div class="small">No tickers saved yet</div>
-            </div>
-            {% endif %}
-          </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="fw-600"><i class="bi bi-lightning me-2 text-warning"></i>Quick Analyze</span>
+      </div>
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+          {% for sym in ["SPY", "QQQ", "AAPL", "MSFT", "TSLA", "NVDA", "AMZN", "META", "GLD", "TLT"] %}
+          <a href="/analyze?ticker={{ sym }}" class="btn btn-sm btn-outline-secondary">{{ sym }}</a>
+          {% endfor %}
         </div>
       </div>
-
-      <!-- Add to Watchlist -->
-      <div class="col-lg-6">
-        <div class="card">
-          <div class="card-header">
-            <span class="fw-600"><i class="bi bi-plus-circle me-2 text-primary"></i>Add to Watchlist</span>
-          </div>
-          <div class="card-body">
-            <form action="/watchlist/add" method="post">
-              <div class="mb-3">
-                <label class="form-label small fw-500">Ticker Symbol</label>
-                <input type="text" name="ticker" class="form-control" placeholder="e.g. NVDA"
-                       autocapitalize="characters" required />
-              </div>
-              <div class="mb-3">
-                <label class="form-label small fw-500">Label (optional)</label>
-                <input type="text" name="name" class="form-control" placeholder="e.g. Nvidia GPU play" />
-              </div>
-              <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-star-fill me-2"></i>Save to Watchlist
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <!-- Quick links -->
-        <div class="card mt-4">
-          <div class="card-header">
-            <span class="fw-600"><i class="bi bi-lightning me-2 text-warning"></i>Quick Analyze</span>
-          </div>
-          <div class="card-body">
-            <div class="d-flex flex-wrap gap-2">
-              {% for sym in ["SPY", "QQQ", "AAPL", "MSFT", "TSLA", "NVDA", "AMZN", "META", "GLD", "TLT"] %}
-              <a href="/analyze?ticker={{ sym }}" class="btn btn-sm btn-outline-secondary">{{ sym }}</a>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 </section>
