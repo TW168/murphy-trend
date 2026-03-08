@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Changelog — Murphy Trend{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 780px;">
+  <div class="mb-5">
+    <h1 class="fw-700 mb-1" style="color: var(--mt-primary);">
+      <i class="bi bi-clock-history me-2"></i>Changelog
+    </h1>
+    <p class="text-muted">New features, improvements, and bug fixes.</p>
+  </div>
+
+  {% set entries = [
+    {
+      "version": "v1.5",
+      "date": "Mar 2026",
+      "type": "new",
+      "items": [
+        "Added Changelog page so visitors can track updates",
+      ]
+    },
+    {
+      "version": "v1.4",
+      "date": "Feb 2026",
+      "type": "fix",
+      "items": [
+        "Fixed Fear &amp; Greed history chart line rendering",
+        "Removed Quick Analyze shortcut (redundant with main Analyze page)"
+      ]
+    },
+    {
+      "version": "v1.3",
+      "date": "Feb 2026",
+      "type": "new",
+      "items": [
+        "Added Fear &amp; Greed Index widget to dashboard with historical chart",
+        "Removed Watchlist section from dashboard for a cleaner layout",
+        "Moved system health indicator to top of dashboard"
+      ]
+    },
+    {
+      "version": "v1.2",
+      "date": "Jan 2026",
+      "type": "new",
+      "items": [
+        "Added Technical Analysis Course as a subpage under Concepts",
+        "Added Valuation Measures section to analysis output",
+        "Extended default chart range to 2 years"
+      ]
+    },
+    {
+      "version": "v1.1",
+      "date": "Jan 2026",
+      "type": "fix",
+      "items": [
+        "Fixed Internal Server Error on certain ticker lookups",
+        "Fixed Concepts page links opening in new tabs"
+      ]
+    },
+    {
+      "version": "v1.0",
+      "date": "Dec 2025",
+      "type": "new",
+      "items": [
+        "Initial release — Murphy Trend is live",
+        "Dashboard with S&amp;P 500, DOW, NASDAQ live prices",
+        "Full technical analysis engine: trend, retracements, patterns, MAs, volume, oscillators, Bollinger Bands",
+        "30 / 60 / 90-day price predictions with plain-English Murphy Outlook",
+        "Murphy Concepts reference page",
+        "John J. Murphy Tribute page",
+        "Dark mode toggle"
+      ]
+    }
+  ] %}
+
+  <div class="d-flex flex-column gap-4">
+    {% for entry in entries %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <span class="fw-700 fs-5" style="color: var(--mt-primary);">{{ entry.version }}</span>
+          <span class="text-muted small">{{ entry.date }}</span>
+          {% if entry.type == "new" %}
+            <span class="badge rounded-pill" style="background: var(--mt-primary); font-size: 0.7rem;">New</span>
+          {% elif entry.type == "fix" %}
+            <span class="badge rounded-pill bg-warning text-dark" style="font-size: 0.7rem;">Fix</span>
+          {% elif entry.type == "improvement" %}
+            <span class="badge rounded-pill bg-info text-dark" style="font-size: 0.7rem;">Improvement</span>
+          {% endif %}
+        </div>
+        <ul class="mb-0 ps-3" style="line-height: 1.9;">
+          {% for item in entry.items %}
+          <li class="text-secondary small">{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
