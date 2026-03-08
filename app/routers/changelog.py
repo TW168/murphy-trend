@@ -10,7 +10,7 @@ ENTRIES = [
         "version": "v1.5",
         "date": "Mar 2026",
         "type": "new",
-        "items": [
+        "changes": [
             "Added Changelog page so visitors can track updates",
         ],
     },
@@ -18,7 +18,7 @@ ENTRIES = [
         "version": "v1.4",
         "date": "Feb 2026",
         "type": "fix",
-        "items": [
+        "changes": [
             "Fixed Fear & Greed history chart line rendering",
             "Removed Quick Analyze shortcut (redundant with main Analyze page)",
         ],
@@ -27,7 +27,7 @@ ENTRIES = [
         "version": "v1.3",
         "date": "Feb 2026",
         "type": "new",
-        "items": [
+        "changes": [
             "Added Fear & Greed Index widget to dashboard with historical chart",
             "Removed Watchlist section from dashboard for a cleaner layout",
             "Moved system health indicator to top of dashboard",
@@ -37,7 +37,7 @@ ENTRIES = [
         "version": "v1.2",
         "date": "Jan 2026",
         "type": "new",
-        "items": [
+        "changes": [
             "Added Technical Analysis Course as a subpage under Concepts",
             "Added Valuation Measures section to analysis output",
             "Extended default chart range to 2 years",
@@ -47,7 +47,7 @@ ENTRIES = [
         "version": "v1.1",
         "date": "Jan 2026",
         "type": "fix",
-        "items": [
+        "changes": [
             "Fixed Internal Server Error on certain ticker lookups",
             "Fixed Concepts page links opening in new tabs",
         ],
@@ -56,7 +56,7 @@ ENTRIES = [
         "version": "v1.0",
         "date": "Dec 2025",
         "type": "new",
-        "items": [
+        "changes": [
             "Initial release — Murphy Trend is live",
             "Dashboard with S&P 500, DOW, NASDAQ live prices",
             "Full technical analysis engine: trend, retracements, patterns, MAs, volume, oscillators, Bollinger Bands",
