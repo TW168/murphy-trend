@@ -58,7 +58,7 @@ def _fetch_all_data() -> dict[str, pd.DataFrame]:
     """Fetch 1y daily data for all tickers in a single download call."""
     raw = yf.download(
         _ALL_TICKERS,
-        period="1y",
+        period="2y",
         group_by="ticker",
         auto_adjust=True,
         threads=True,
