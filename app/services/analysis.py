@@ -6,19 +6,22 @@ Implements indicators and signals from John J. Murphy's
 
 from __future__ import annotations
 
-import json
 from datetime import datetime
-from zoneinfo import ZoneInfo
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from app.services.market_data import fetch_stock_data, fetch_ticker_info, fetch_valuation_data
+from app.services.market_data import (
+    fetch_raw_ticker_info,
+    fetch_stock_data,
+    fetch_ticker_info,
+    fetch_valuation_data,
+)
 from app.services.patterns import detect_patterns
-
 
 # ---------------------------------------------------------------------------
 # Indicator calculations
@@ -128,7 +131,13 @@ def _fibonacci_levels(swing_low: float, swing_high: float) -> dict[str, float]:
 # ---------------------------------------------------------------------------
 
 
-def _score_trend(df: pd.DataFrame, sma50: float | None, sma200: float | None) -> list[dict]:
+def _score_trend(
+    df: pd.DataFrame,
+    sma50: float | None,
+    sma200: float | None,
+    sma50_series: pd.Series | None = None,
+    sma200_series: pd.Series | None = None,
+) -> list[dict]:
     signals = []
     close = df["Close"]
     price = float(close.iloc[-1])
@@ -193,10 +202,14 @@ def _score_trend(df: pd.DataFrame, sma50: float | None, sma200: float | None) ->
 
     if sma50 is not None and sma200 is not None:
         # Golden / Death cross — check recent crossover (last 10 days)
-        sma50_series = _sma(df["Close"], 50).tail(10)
-        sma200_series = _sma(df["Close"], 200).tail(10)
-        valid = sma50_series.dropna()
-        valid200 = sma200_series.dropna()
+        sma50_recent = (
+            sma50_series.tail(10) if sma50_series is not None else _sma(df["Close"], 50).tail(10)
+        )
+        sma200_recent = (
+            sma200_series.tail(10) if sma200_series is not None else _sma(df["Close"], 200).tail(10)
+        )
+        valid = sma50_recent.dropna()
+        valid200 = sma200_recent.dropna()
         if len(valid) >= 2 and len(valid200) >= 2:
             crossed_up = valid.iloc[-2] < valid200.iloc[-2] and valid.iloc[-1] > valid200.iloc[-1]
             crossed_dn = valid.iloc[-2] > valid200.iloc[-2] and valid.iloc[-1] < valid200.iloc[-1]
@@ -353,8 +366,6 @@ def _score_bollinger(price: float, bb_upper: float | None, bb_mid: float | None,
 def _score_volume(df: pd.DataFrame) -> dict | None:
     if "Volume" not in df.columns:
         return None
-    close = df["Close"]
-    volume = df["Volume"]
     recent = df.tail(10)
     price_up = float(recent["Close"].iloc[-1]) > float(recent["Close"].iloc[0])
     vol_avg_recent = float(recent["Volume"].mean())
@@ -609,8 +620,9 @@ def analyze_ticker(ticker: str) -> dict[str, Any]:
     """
     ticker = ticker.upper().strip()
     df = fetch_stock_data(ticker, period="2y")
-    info = fetch_ticker_info(ticker)
-    valuation = fetch_valuation_data(ticker)
+    raw_info = fetch_raw_ticker_info(ticker)
+    info = fetch_ticker_info(ticker, raw_info)
+    valuation = fetch_valuation_data(ticker, raw_info)
 
     close = df["Close"]
     price = float(close.iloc[-1])
@@ -639,29 +651,29 @@ def analyze_ticker(ticker: str) -> dict[str, Any]:
     atr_val = float(atr_s.iloc[-1]) if not pd.isna(atr_s.iloc[-1]) else None
 
     # --- Signals ---
-    raw_signals: list[dict] = []
-    raw_signals.extend(_score_trend(df, sma50, sma200))
+    indicator_signals: list[dict] = []
+    indicator_signals.extend(_score_trend(df, sma50, sma200, sma50_s, sma200_s))
     rsi_sig = _score_rsi(rsi_val)
     if rsi_sig:
-        raw_signals.append(rsi_sig)
-    raw_signals.extend(_score_macd(macd_val, signal_val, hist_val, prev_hist))
+        indicator_signals.append(rsi_sig)
+    indicator_signals.extend(_score_macd(macd_val, signal_val, hist_val, prev_hist))
     bb_sig = _score_bollinger(price, bb_upper, bb_mid, bb_lower)
     if bb_sig:
-        raw_signals.append(bb_sig)
+        indicator_signals.append(bb_sig)
     vol_sig = _score_volume(df)
     if vol_sig:
-        raw_signals.append(vol_sig)
+        indicator_signals.append(vol_sig)
     obv_sig = _score_obv(df)
     if obv_sig:
-        raw_signals.append(obv_sig)
+        indicator_signals.append(obv_sig)
 
     # --- Pattern signals (contribute to score) ---
     pattern_signals = detect_patterns(df)
-    raw_signals.extend(pattern_signals)
+    all_signals = indicator_signals + pattern_signals
 
     # Weighted score
-    total_weight = sum(s["weight"] for s in raw_signals)
-    weighted_sum = sum(s["score"] * s["weight"] for s in raw_signals)
+    total_weight = sum(s["weight"] for s in all_signals)
+    weighted_sum = sum(s["score"] * s["weight"] for s in all_signals)
     outlook_score = round(float(weighted_sum / total_weight) if total_weight > 0 else 0.0, 3)
     outlook_score = max(-1.0, min(1.0, outlook_score))
 
@@ -673,8 +685,6 @@ def analyze_ticker(ticker: str) -> dict[str, Any]:
         outlook = "neutral"
 
     # Clean signals for output (remove internal score/weight keys)
-    # Separate pattern signals from indicator signals for dedicated display
-    indicator_signals = [s for s in raw_signals if s not in pattern_signals]
     signals_out = [
         {k: v for k, v in s.items() if k not in ("score", "weight")}
         for s in indicator_signals

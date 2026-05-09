@@ -158,6 +158,42 @@
       </div>
     </div>
 
+    <!-- NYSE Net New 52-Week Highs & Lows -->
+    {% if hl_data and hl_data.chart_json %}
+    <div class="card mt-4">
+      <div class="card-body">
+        <div class="row g-0">
+          <!-- Chart -->
+          <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div>
+                <div class="text-uppercase fw-700 small" style="letter-spacing: 0.05em;">Stock Price Strength</div>
+                <div class="text-muted small"># of NYSE stocks at 52-week highs minus those at 52-week lows</div>
+              </div>
+              <span class="badge border fw-600 px-3 py-2 ms-3 flex-shrink-0
+                {% if hl_data.signal == 'Greed' %}text-success border-success
+                {% elif hl_data.signal == 'Fear' %}text-danger border-danger
+                {% else %}text-secondary border-secondary{% endif %}"
+                style="background: transparent; letter-spacing: 0.07em; font-size: 0.7rem;">
+                {{ hl_data.signal | upper }}
+              </span>
+            </div>
+            <div id="hlChart" style="height: 230px;"></div>
+            {% if hl_data.last_updated %}
+            <div class="text-muted" style="font-size: 0.72rem; margin-top: 2px;">Last updated {{ hl_data.last_updated }}</div>
+            {% endif %}
+          </div>
+          <!-- Explanation -->
+          <div class="col-lg-3 ps-lg-4 d-flex align-items-center">
+            <p class="text-muted small mb-0">
+              Tracks how many NYSE stocks are hitting 52-week highs vs. lows each day. When more stocks are making new highs than lows, it confirms broad market strength — not just a handful of mega-caps carrying the index. A rising net is bullish; a falling net signals deteriorating breadth beneath the surface.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
   </div>
 </section>
 {% endif %}
@@ -272,6 +308,17 @@
     displayModeBar: false,
   });
   syncDarkMode(vixEl);
+  {% endif %}
+
+  // --- NYSE Net New 52-Week Highs & Lows Chart ---
+  {% if hl_data and hl_data.chart_json %}
+  const hlData = {{ hl_data.chart_json | safe }};
+  const hlEl = document.getElementById('hlChart');
+  Plotly.newPlot(hlEl, hlData.data, hlData.layout, {
+    responsive: true,
+    displayModeBar: false,
+  });
+  syncDarkMode(hlEl);
   {% endif %}
 })();
 </script>

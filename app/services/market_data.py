@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
-import yfinance as yf
 import pandas as pd
-
+import yfinance as yf
 
 INDEX_TICKERS = {
     "S&P 500": "^GSPC",
     "Dow Jones": "^DJI",
     "NASDAQ": "^IXIC",
 }
+
+
+def fetch_raw_ticker_info(ticker: str) -> dict:
+    """Return raw yfinance info payload for a ticker."""
+    return yf.Ticker(ticker).info or {}
 
 
 def fetch_stock_data(ticker: str, period: str = "2y") -> pd.DataFrame:
@@ -23,10 +27,9 @@ def fetch_stock_data(ticker: str, period: str = "2y") -> pd.DataFrame:
     return df
 
 
-def fetch_ticker_info(ticker: str) -> dict:
+def fetch_ticker_info(ticker: str, info: dict | None = None) -> dict:
     """Return basic info dict for a ticker (name, sector, market cap)."""
-    t = yf.Ticker(ticker)
-    info = t.info or {}
+    info = info or fetch_raw_ticker_info(ticker)
     sector = (
         info.get("sector")
         or info.get("category")
@@ -41,9 +44,9 @@ def fetch_ticker_info(ticker: str) -> dict:
     }
 
 
-def fetch_valuation_data(ticker: str) -> dict:
+def fetch_valuation_data(ticker: str, info: dict | None = None) -> dict:
     """Return valuation measures and financial highlights from yfinance."""
-    info = yf.Ticker(ticker).info or {}
+    info = info or fetch_raw_ticker_info(ticker)
 
     def _fmt_large(val):
         if val is None:

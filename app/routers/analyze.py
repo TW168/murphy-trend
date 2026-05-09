@@ -1,5 +1,6 @@
+import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -63,7 +64,8 @@ async def analyze_get(request: Request, ticker: str = "", db: Session = Depends(
         result = cached
     else:
         try:
-            result = analyze_ticker(ticker)
+            # Run CPU/network-heavy analysis off the event loop.
+            result = await asyncio.to_thread(analyze_ticker, ticker)
             _save_cache(db, ticker, result)
         except ValueError as e:
             error = str(e)
