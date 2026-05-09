@@ -292,10 +292,10 @@
   {% if fear_greed.chart_json %}
   const chartData = {{ fear_greed.chart_json | safe }};
   const fgEl = document.getElementById('fgChart');
-  mtPlotWithLoader(fgEl, chartData.data, chartData.layout, {
+  Plotly.newPlot(fgEl, chartData.data, chartData.layout, {
     responsive: true,
     displayModeBar: false,
-  }, 'Rendering sentiment chart...');
+  });
   syncDarkMode(fgEl);
   {% endif %}
 
@@ -303,10 +303,10 @@
   {% if fear_greed.vix_chart_json %}
   const vixData = {{ fear_greed.vix_chart_json | safe }};
   const vixEl = document.getElementById('vixChart');
-  mtPlotWithLoader(vixEl, vixData.data, vixData.layout, {
+  Plotly.newPlot(vixEl, vixData.data, vixData.layout, {
     responsive: true,
     displayModeBar: false,
-  }, 'Rendering VIX chart...');
+  });
   syncDarkMode(vixEl);
   {% endif %}
 
@@ -314,10 +314,10 @@
   {% if hl_data and hl_data.chart_json %}
   const hlData = {{ hl_data.chart_json | safe }};
   const hlEl = document.getElementById('hlChart');
-  mtPlotWithLoader(hlEl, hlData.data, hlData.layout, {
+  Plotly.newPlot(hlEl, hlData.data, hlData.layout, {
     responsive: true,
     displayModeBar: false,
-  }, 'Rendering breadth chart...');
+  });
   syncDarkMode(hlEl);
   {% endif %}
 })();
