@@ -296,6 +296,14 @@ def _build_chart(dates: pd.DatetimeIndex, scores: pd.Series) -> str:
     """Build a Plotly JSON chart of historical Fear & Greed scores."""
     sma125 = _sma(scores, 125)
 
+    # Show the most recent 365 calendar days in the historical chart.
+    end_date = dates.max()
+    start_date = end_date - pd.Timedelta(days=365)
+    mask = dates >= start_date
+    plot_dates = dates[mask]
+    plot_scores = scores.reindex(plot_dates)
+    plot_sma125 = sma125.reindex(plot_dates)
+
     fig = go.Figure()
 
     # Sentiment zone bands
@@ -311,7 +319,7 @@ def _build_chart(dates: pd.DatetimeIndex, scores: pd.Series) -> str:
 
     # Score line
     fig.add_trace(go.Scatter(
-        x=dates, y=scores, mode="lines",
+        x=plot_dates, y=plot_scores, mode="lines",
         name="Fear & Greed",
         line=dict(color="#2a9d8f", width=2),
         hovertemplate="%{x|%b %d}: %{y:.0f}<extra></extra>",
@@ -319,7 +327,7 @@ def _build_chart(dates: pd.DatetimeIndex, scores: pd.Series) -> str:
 
     # 125-day MA
     fig.add_trace(go.Scatter(
-        x=dates, y=sma125, mode="lines",
+        x=plot_dates, y=plot_sma125, mode="lines",
         name="125-day MA",
         line=dict(color="#277da1", width=1.5, dash="dash"),
         hovertemplate="%{x|%b %d}: %{y:.0f}<extra></extra>",
@@ -359,17 +367,24 @@ def _build_vix_chart(
     close = df["Close"]
     sma50 = _sma(close, 50)
 
+    # Show the most recent 365 calendar days in the volatility chart.
+    end_date = df.index.max()
+    start_date = end_date - pd.Timedelta(days=365)
+    plot_df = df[df.index >= start_date]
+    plot_close = close.reindex(plot_df.index)
+    plot_sma50 = sma50.reindex(plot_df.index)
+
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(
-        x=df.index, y=close, mode="lines",
+        x=plot_df.index, y=plot_close, mode="lines",
         name="VIX",
         line=dict(color="#e63946", width=2),
         hovertemplate="%{x|%b %d}: %{y:.2f}<extra></extra>",
     ))
 
     fig.add_trace(go.Scatter(
-        x=df.index, y=sma50, mode="lines",
+        x=plot_df.index, y=plot_sma50, mode="lines",
         name="50-day MA",
         line=dict(color="#277da1", width=1.5, dash="dash"),
         hovertemplate="%{x|%b %d}: %{y:.2f}<extra></extra>",
