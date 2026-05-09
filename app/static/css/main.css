@@ -306,6 +306,40 @@ body {
 
 [data-bs-theme="dark"] .fg-component .progress { background: #2d3248; }
 
+/* ---- Loading states ---- */
+.plotly-loading-target { position: relative; }
+
+.plotly-loading-target.plotly-loading::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(1px);
+  z-index: 5;
+}
+
+.plotly-loading-target.plotly-loading::after {
+  content: attr(data-loading-text);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--mt-muted);
+  background: var(--mt-card);
+  border: 1px solid var(--mt-border);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  z-index: 6;
+  white-space: nowrap;
+}
+
+[data-bs-theme="dark"] .plotly-loading-target.plotly-loading::before {
+  background: rgba(15, 17, 23, 0.7);
+}
+
 /* ---- Animations ---- */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .card { animation: fadeIn 0.3s ease forwards; }

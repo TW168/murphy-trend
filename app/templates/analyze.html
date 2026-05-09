@@ -223,7 +223,7 @@
         <span class="text-muted fw-400 small ms-2">2 Years · Daily · Bollinger Bands · SMA 50/200 · MACD · RSI</span>
       </div>
       <div class="card-body p-2">
-        <div id="chart" style="height:620px"></div>
+        <div id="chart" class="plotly-loading-target" data-loading-text="Rendering chart..." style="height:620px"></div>
       </div>
     </div>
   </div>
@@ -442,12 +442,12 @@
 <script>
 (function() {
   const chartData = {{ result.chart_json | safe }};
-  Plotly.newPlot('chart', chartData.data, chartData.layout, {
+  mtPlotWithLoader('chart', chartData.data, chartData.layout, {
     responsive: true,
     displayModeBar: true,
     modeBarButtonsToRemove: ['select2d', 'lasso2d'],
     displaylogo: false,
-  });
+  }, 'Rendering price chart...');
 
   // Baseline shapes/annotations drawn by Python (gaps, S/R labels)
   const baseShapes = (chartData.layout.shapes || []).map(s => ({...s}));

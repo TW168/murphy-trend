@@ -143,7 +143,7 @@
             <p class="text-muted small mb-2">
               VIX and its 50-day moving average
             </p>
-            <div id="vixChart" style="height: 220px;"></div>
+            <div id="vixChart" class="plotly-loading-target" data-loading-text="Rendering VIX chart..." style="height: 220px;"></div>
           </div>
         </div>
       </div>
@@ -154,7 +154,7 @@
     <div class="card mt-4">
       <div class="card-body">
         <h5 class="section-label mb-2">Historical Fear & Greed</h5>
-        <div id="fgChart" style="height: 220px;"></div>
+        <div id="fgChart" class="plotly-loading-target" data-loading-text="Rendering sentiment chart..." style="height: 220px;"></div>
       </div>
     </div>
 
@@ -178,7 +178,7 @@
                 {{ hl_data.signal | upper }}
               </span>
             </div>
-            <div id="hlChart" style="height: 230px;"></div>
+            <div id="hlChart" class="plotly-loading-target" data-loading-text="Rendering breadth chart..." style="height: 230px;"></div>
             {% if hl_data.last_updated %}
             <div class="text-muted" style="font-size: 0.72rem; margin-top: 2px;">Last updated {{ hl_data.last_updated }}</div>
             {% endif %}
@@ -292,10 +292,10 @@
   {% if fear_greed.chart_json %}
   const chartData = {{ fear_greed.chart_json | safe }};
   const fgEl = document.getElementById('fgChart');
-  Plotly.newPlot(fgEl, chartData.data, chartData.layout, {
+  mtPlotWithLoader(fgEl, chartData.data, chartData.layout, {
     responsive: true,
     displayModeBar: false,
-  });
+  }, 'Rendering sentiment chart...');
   syncDarkMode(fgEl);
   {% endif %}
 
@@ -303,10 +303,10 @@
   {% if fear_greed.vix_chart_json %}
   const vixData = {{ fear_greed.vix_chart_json | safe }};
   const vixEl = document.getElementById('vixChart');
-  Plotly.newPlot(vixEl, vixData.data, vixData.layout, {
+  mtPlotWithLoader(vixEl, vixData.data, vixData.layout, {
     responsive: true,
     displayModeBar: false,
-  });
+  }, 'Rendering VIX chart...');
   syncDarkMode(vixEl);
   {% endif %}
 
@@ -314,10 +314,10 @@
   {% if hl_data and hl_data.chart_json %}
   const hlData = {{ hl_data.chart_json | safe }};
   const hlEl = document.getElementById('hlChart');
-  Plotly.newPlot(hlEl, hlData.data, hlData.layout, {
+  mtPlotWithLoader(hlEl, hlData.data, hlData.layout, {
     responsive: true,
     displayModeBar: false,
-  });
+  }, 'Rendering breadth chart...');
   syncDarkMode(hlEl);
   {% endif %}
 })();

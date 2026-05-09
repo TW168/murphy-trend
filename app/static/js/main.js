@@ -36,6 +36,40 @@ document.querySelectorAll('input[name="ticker"]').forEach(input => {
   });
 });
 
+// ---- Analyze form submit feedback ----
+document.querySelectorAll('form[action="/analyze"]').forEach(form => {
+  form.addEventListener('submit', () => {
+    const button = form.querySelector('button[type="submit"]');
+    if (!button || button.disabled) {
+      return;
+    }
+    button.dataset.originalHtml = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...';
+  });
+});
+
+// ---- Plotly render helper with loading state ----
+window.mtPlotWithLoader = function mtPlotWithLoader(target, data, layout, config, loadingText) {
+  const el = typeof target === 'string' ? document.getElementById(target) : target;
+  if (!el || typeof Plotly === 'undefined') {
+    return Promise.resolve();
+  }
+
+  el.classList.add('plotly-loading', 'plotly-loading-target');
+  el.setAttribute('data-loading-text', loadingText || 'Rendering chart...');
+
+  return Plotly.newPlot(el, data, layout, config)
+    .then(() => {
+      el.classList.remove('plotly-loading');
+      el.removeAttribute('data-loading-text');
+    })
+    .catch((err) => {
+      el.setAttribute('data-loading-text', 'Chart render failed');
+      throw err;
+    });
+};
+
 // ---- Plotly dark-mode sync ----
 (function () {
   const chartEl = document.getElementById('chart');
