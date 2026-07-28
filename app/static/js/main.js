@@ -43,7 +43,20 @@ document.querySelectorAll('form[action="/analyze"]').forEach(form => {
     if (!button || button.disabled) {
       return;
     }
+
+    const opensNewTab = form.target === '_blank' || form.getAttribute('target') === '_blank';
     button.dataset.originalHtml = button.innerHTML;
+
+    if (opensNewTab) {
+      button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Opening...';
+      window.setTimeout(() => {
+        if (button.dataset.originalHtml) {
+          button.innerHTML = button.dataset.originalHtml;
+        }
+      }, 1500);
+      return;
+    }
+
     button.disabled = true;
     button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...';
   });
