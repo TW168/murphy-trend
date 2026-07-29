@@ -3,157 +3,140 @@
 
 {% block content %}
 <div class="container px-4 px-lg-5 py-4">
-  <h1 class="mb-3">SOXL Examiner</h1>
+  {% if not result %}
+    {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% else %}
+      <div class="alert alert-secondary">No data to show.</div>
+    {% endif %}
+  {% else %}
 
-  {% if error %}
-  <div class="alert alert-danger">{{ error }}</div>
-  {% endif %}
+  <div class="d-flex align-items-start gap-4 mb-3">
+    <div>
+      <h1 class="mb-0">SOXL</h1>
+      <div class="small text-muted">Direxion Daily Semiconductor Bull 3X</div>
+    </div>
+    <div class="ms-auto text-end">
+      <div class="h3 mb-0">${{ "{:.2f}"|format(result.latest.close) }}</div>
+      {% if result.latest.prev_close %}
+      <div class="small text-muted">{{ "{:+.2f}"|format(result.latest.close - result.latest.prev_close) }} ({{ "{:+.2f}"|format((result.latest.close/result.latest.prev_close-1)*100) }}%) vs prev close</div>
+      {% endif %}
+    </div>
+  </div>
 
-  {% if stale %}
-  <div class="alert alert-warning">Data fetch failed — showing last cached values (stale).</div>
-  {% endif %}
+  <!-- Verdict banner -->
+  {% set v = diagnostics.verdict %}
+  <div class="mb-3 p-4 rounded-3 text-white" style="background: {% if v=='BUY' %}#2a9d8f{% elif v=='SELL' %}#e63946{% else %}#f0ad4e{% endif %};">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-0">{{ v }}</h2>
+        <div class="small">{{ diagnostics.E1_macd_above_signal | ternary('Entry conditions checked','') }}</div>
+      </div>
+      <div class="text-end small">
+        <div>Entry conditions met <strong>{{ (diagnostics.E1_macd_above_signal and diagnostics.E2_rsi_gt_40 and diagnostics.E3_above_gap_reclaim) | int }}/3</strong></div>
+        <div>Conditions blocking <strong>{{ 3 - ((diagnostics.E1_macd_above_signal and diagnostics.E2_rsi_gt_40 and diagnostics.E3_above_gap_reclaim) | int) }}</strong></div>
+        <div>Exit triggers firing <strong>{{ (diagnostics.X1_macd_below_signal or diagnostics.X2_below_stop or diagnostics.X3_fresh_gap_held) | int }}</strong></div>
+      </div>
+    </div>
+  </div>
 
-  {% if result %}
+  <p class="mb-3"><strong>{{ 'WAIT' if v=='WAIT' else (v) }}</strong> — {% if v=='WAIT' %}Under these rules there is nothing to do today. Doing nothing is the position.{% endif %}</p>
+
+  <h3>Entry ladder</h3>
+  <p class="text-muted">All three rungs must be green on a daily close before an entry signal prints. Rung 0 is the early-warning, not a trigger.</p>
+
   <div class="mb-4">
-    {% set v = diagnostics.verdict %}
-    <div class="p-4 rounded-3 text-white" style="background: {% if v=='BUY' %}#2a9d8f{% elif v=='SELL' %}#e63946{% else %}#f0ad4e{% endif %};">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <h2 class="mb-0">{{ v }}</h2>
-          <div class="small">readings as of {{ result.latest.date }}</div>
-        </div>
-        <div class="text-end">
-          <div class="fw-700">${{ "{:.2f}"|format(result.latest.close) }}</div>
-          <div class="small">{% if result.latest.prev_close %}{{ 
-            (result.latest.close - result.latest.prev_close) | round(2)
-          }} ({{ ((result.latest.close/result.latest.prev_close-1)*100) | round(2) }}%) {% endif %}</div>
-        </div>
-      </div>
+    <div class="mb-3">
+      <h5>0 — Early warning — histogram contracting</h5>
+      <p class="mb-1 small text-muted">Selling must stop accelerating before any bottom forms. Watch-only: does not permit entry by itself.</p>
+      <div class="fw-600 {% if diagnostics.E0_histogram_contracting %}text-success{% else %}text-danger{% endif %}">{% if diagnostics.E0_histogram_contracting %}MET{% else %}Blocked — Still expanding — decline accelerating{% endif %}</div>
+    </div>
+
+    <div class="mb-3">
+      <h5>1 — MACD line crosses above signal line</h5>
+      <p class="mb-1 small text-muted">The momentum reversal trigger. Gap between the lines is the histogram — rung 0 shrinking is this rung approaching.</p>
+      {% if diagnostics.E1_macd_above_signal %}
+        <div class="fw-600 text-success">MET</div>
+      {% else %}
+        <div class="fw-600 text-danger">Blocked</div>
+        <div class="small text-muted">Gap to cross: {{ "{:.3f}"|format(result.signal - result.macd) }} pts</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <h5>2 — RSI recovers above 40</h5>
+      <p class="mb-1 small text-muted">Confirms momentum has left the bear regime (30s) rather than bouncing inside it.</p>
+      {% if diagnostics.E2_rsi_gt_40 %}
+        <div class="fw-600 text-success">MET</div>
+      {% else %}
+        <div class="fw-600 text-danger">Blocked</div>
+        <div class="small text-muted">RSI {{ "{:.1f}"|format(result.rsi) }} — needs +{{ "{:.1f}"|format(40 - result.rsi) }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <h5>3 — Close above latest gap-down zone {% if result.gap_level %}(${{ "{:.2f}"|format(result.gap_level) }}){% endif %}</h5>
+      <p class="mb-1 small text-muted">Proves buyers absorbed the breakdown. An unreclaimed gap overhead means trapped sellers waiting.</p>
+      {% if diagnostics.E3_above_gap_reclaim %}
+        <div class="fw-600 text-success">MET</div>
+      {% else %}
+        <div class="fw-600 text-danger">Blocked</div>
+        {% if result.gap_level %}
+        <div class="small text-muted">{{ "{:.1f}"|format((result.latest.close/result.gap_level-1)*100) }}% below reclaim level</div>
+        {% else %}
+        <div class="small text-muted">No gap in lookback</div>
+        {% endif %}
+      {% endif %}
     </div>
   </div>
 
-  <!-- Entry ladder -->
-  <h4>Entry Ladder</h4>
-  <div class="list-group mb-4">
-    <div class="list-group-item d-flex justify-content-between align-items-center">
-      <div>
-        <div class="fw-600">E0: Histogram contracting</div>
-        <div class="small text-muted">abs(hist) contracting for two consecutive bars</div>
-      </div>
-      <div class="text-end">
-        <div class="fw-600 {% if diagnostics.E0_histogram_contracting %}text-success{% else %}text-muted{% endif %}">
-          {% if diagnostics.E0_histogram_contracting %}MET{% else %}NOT MET{% endif %}
-        </div>
-      </div>
-    </div>
+  <h3>Exit rules (only while holding)</h3>
+  <p class="small text-muted">Any single trigger firing is an exit. No averaging down past a fired trigger.</p>
 
-    <div class="list-group-item d-flex justify-content-between align-items-center">
-      <div>
-        <div class="fw-600">E1: MACD &gt; Signal</div>
-        <div class="small text-muted">MACD {{ "{:.2f}"|format(result.macd) }} vs Signal {{ "{:.2f}"|format(result.signal) }}</div>
-      </div>
-      <div class="text-end">
-        {% if diagnostics.E1_macd_above_signal %}
-        <div class="fw-600 text-success">MET</div>
-        <div class="small text-muted">Delta {{ "{:.2f}"|format(result.macd - result.signal) }}</div>
-        {% else %}
-        <div class="fw-600 text-danger">BLOCKED</div>
-        <div class="small text-muted">Need MACD +{{ "{:.2f}"|format(result.signal - result.macd) }}</div>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class="list-group-item d-flex justify-content-between align-items-center">
-      <div>
-        <div class="fw-600">E2: RSI &gt; 40</div>
-        <div class="small text-muted">RSI {{ "{:.2f}"|format(result.rsi) }}</div>
-      </div>
-      <div class="text-end">
-        {% if diagnostics.E2_rsi_gt_40 %}
-        <div class="fw-600 text-success">MET</div>
-        {% else %}
-        <div class="fw-600 text-danger">BLOCKED</div>
-        <div class="small text-muted">RSI needs +{{ "{:.2f}"|format(40 - result.rsi) }}</div>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class="list-group-item d-flex justify-content-between align-items-center">
-      <div>
-        <div class="fw-600">E3: Above most recent gap reclaim</div>
-        <div class="small text-muted">{% if result.gap_level %}Reclaim level ${{ "{:.2f}"|format(result.gap_level) }}{% else %}No gap in lookback{% endif %}</div>
-      </div>
-      <div class="text-end">
-        {% if diagnostics.E3_above_gap_reclaim %}
-        <div class="fw-600 text-success">MET</div>
-        {% else %}
-        <div class="fw-600 text-danger">BLOCKED</div>
-        <div class="small text-muted">{{ "{:.2f}"|format(result.gap_level - result.latest.close) }} below reclaim</div>
-        {% endif %}
-      </div>
-    </div>
+  <div class="mb-4">
+    <div class="mb-2"><strong>X1 — MACD crosses back below signal</strong> — {% if diagnostics.X1_macd_below_signal %}<span class="text-danger">FIRING — exit condition active</span>{% else %}<span class="text-muted">Status: not firing</span>{% endif %}</div>
+    <div class="mb-2"><strong>X2 — Close below your stop</strong> — {% if diagnostics.X2_below_stop %}<span class="text-danger">FIRING</span>{% else %}<span class="text-muted">Status: not firing</span>{% endif %}</div>
+    <div class="mb-2"><strong>X3 — New gap down holds through the close</strong> — {% if diagnostics.X3_fresh_gap_held %}<span class="text-danger">FIRING — exit condition active</span>{% else %}<span class="text-muted">Status: not firing</span>{% endif %}</div>
   </div>
 
-  <!-- Exit triggers -->
-  <h4>Exit Triggers</h4>
-  <div class="row mb-4">
-    <div class="col-md-4">
-      <div class="card p-3 text-center">
-        <div class="fw-600">X1: MACD &lt; Signal</div>
-        <div class="mt-2 {% if diagnostics.X1_macd_below_signal %}text-danger{% else %}text-muted{% endif %}">
-          {% if diagnostics.X1_macd_below_signal %}FIRING{% else %}Not firing{% endif %}
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card p-3 text-center">
-        <div class="fw-600">X2: Below Stop</div>
-        <div class="mt-2 text-muted">Set stop to evaluate</div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card p-3 text-center">
-        <div class="fw-600">X3: Fresh gap down held</div>
-        <div class="mt-2 {% if diagnostics.X3_fresh_gap_held %}text-danger{% else %}text-muted{% endif %}">
-          {% if diagnostics.X3_fresh_gap_held %}FIRING{% else %}Not firing{% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Position tracker -->
-  <h4>Position Tracker</h4>
+  <h3>Position tracker</h3>
+  <p class="small text-muted">Enter a position to see live P/L, risk and reward at current price.</p>
   <div class="card p-3 mb-4">
     <div class="row g-2 align-items-center">
       <div class="col-md-3"><input id="entry" class="form-control" placeholder="Entry price"></div>
       <div class="col-md-2"><input id="shares" class="form-control" placeholder="Shares"></div>
-      <div class="col-md-2"><input id="stop" class="form-control" placeholder="Stop price"></div>
-      <div class="col-md-2"><input id="target" class="form-control" placeholder="Target price"></div>
-      <div class="col-md-3 text-end">
-        <button id="savePos" class="btn btn-primary">Save</button>
-      </div>
+      <div class="col-md-2"><input id="stop" class="form-control" placeholder="Stop (your floor)"></div>
+      <div class="col-md-2"><input id="target" class="form-control" placeholder="Target"></div>
+      <div class="col-md-3 text-end"><button id="savePos" class="btn btn-primary">Update readings</button></div>
     </div>
-
-    <div class="mt-3" id="posStats">
-      <div class="small text-muted">Enter position details to see P/L and risk metrics.</div>
-    </div>
+    <div class="mt-3" id="posStats"><div class="small text-muted">Enter values and click Update readings.</div></div>
   </div>
 
-  <!-- Raw values -->
-  <h4>Computed Values</h4>
-  <table class="table table-sm mb-3">
+  <h3>Readings</h3>
+  <table class="table table-sm mb-4">
     <tbody>
-      <tr><td>MACD</td><td>{{ "{:.4f}"|format(result.macd) }}</td></tr>
-      <tr><td>Signal</td><td>{{ "{:.4f}"|format(result.signal) }}</td></tr>
-      <tr><td>Histogram</td><td>{{ "{:.4f}"|format(result.hist) }}</td></tr>
-      <tr><td>RSI(14)</td><td>{{ "{:.2f}"|format(result.rsi) }}</td></tr>
-      <tr><td>SMA50</td><td>{{ "{:.2f}"|format(result.sma50) }}</td></tr>
-      <tr><td>SMA200</td><td>{{ "{:.2f}"|format(result.sma200) }}</td></tr>
-      <tr><td>Last gap reclaim</td><td>{% if result.gap_level %}${{ "{:.2f}"|format(result.gap_level) }}{% else %}—{% endif %}</td></tr>
+      <tr><td>Last price</td><td>${{ "{:.2f}"|format(result.latest.close) }}</td></tr>
+      <tr><td>Previous close</td><td>${{ "{:.2f}"|format(result.latest.prev_close) }}</td></tr>
+      <tr><td>MACD line</td><td>{{ "{:.4f}"|format(result.macd) }}</td></tr>
+      <tr><td>MACD signal line</td><td>{{ "{:.4f}"|format(result.signal) }}</td></tr>
+      <tr><td>Histogram direction</td><td>{% if (result.hist - result.hist_prev) > 0 %}Expanding (accelerating){% else %}Contracting (decelerating){% endif %}</td></tr>
+      <tr><td>RSI (14)</td><td>{{ "{:.1f}"|format(result.rsi) }}</td></tr>
+      <tr><td>Latest gap-down top</td><td>{% if result.gap_level %}${{ "{:.2f}"|format(result.gap_level) }}{% else %}—{% endif %}</td></tr>
+      <tr><td>New gap down today, held to close?</td><td>{% if result.fresh_gap_held %}Yes — gap held (bearish){% else %}No new gap / gap was filled{% endif %}</td></tr>
+      <tr><td>Volume trend</td><td>
+        {% if result.price_falling_vs_10 and result.vol_rising %}Falling price + rising volume
+        {% elif result.price_falling_vs_10 and not result.vol_rising %}Falling price + fading volume
+        {% elif not result.price_falling_vs_10 and result.vol_rising %}Rising price + rising volume
+        {% else %}Quiet / mixed
+        {% endif %}
+      </td></tr>
+      <tr><td>Reading date</td><td>{{ result.latest.date }}</td></tr>
     </tbody>
   </table>
 
-  <div class="small text-muted">Signals are computed on daily closes and are lagging by design. Informational purposes only. Not financial advice.</div>
+  <div class="small text-muted mb-5">Recalculate verdict — Rules are evaluated on daily closes. Intraday touches of a level are noise; the close is the vote that counts.</div>
+
+  <div class="small text-muted">Rule engine follows classic Murphy trend-following logic: enter on confirmed momentum reversal, exit on trend violation. Signals are lagging by design. Informational purposes only. Not financial advice.</div>
 
   <script>
   (function(){
@@ -202,9 +185,6 @@
   })();
   </script>
 
-  {% else %}
-  <div class="alert alert-secondary">No data to show.</div>
   {% endif %}
-
 </div>
 {% endblock %}
