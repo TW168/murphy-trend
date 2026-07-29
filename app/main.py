@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.database import Base, engine
-from app.routers import analyze, changelog, dashboard, health, help_route, tribute
+from app.routers import analyze, changelog, dashboard, health, help_route, tribute, soxl
 
 
 @asynccontextmanager
@@ -23,4 +23,5 @@ app.include_router(help_route.router)
 app.include_router(health.router)
 app.include_router(tribute.router)
 app.include_router(changelog.router)
+app.include_router(soxl.router)
 

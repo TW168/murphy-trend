@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}SOXL Examiner — Murphy Trend{% endblock %}
+
+{% block content %}
+<div class="container px-4 px-lg-5 py-4">
+  <h1 class="mb-3">SOXL Examiner</h1>
+
+  {% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  {% if stale %}
+  <div class="alert alert-warning">Data fetch failed — showing last cached values (stale).</div>
+  {% endif %}
+
+  {% if result %}
+  <div class="mb-4">
+    {% set v = diagnostics.verdict %}
+    <div class="p-4 rounded-3 text-white" style="background: {% if v=='BUY' %}#2a9d8f{% elif v=='SELL' %}#e63946{% else %}#f0ad4e{% endif %};">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="mb-0">{{ v }}</h2>
+          <div class="small">readings as of {{ result.latest.date }}</div>
+        </div>
+        <div class="text-end">
+          <div class="fw-700">${{ "{:.2f}"|format(result.latest.close) }}</div>
+          <div class="small">{% if result.latest.prev_close %}{{ 
+            (result.latest.close - result.latest.prev_close) | round(2)
+          }} ({{ ((result.latest.close/result.latest.prev_close-1)*100) | round(2) }}%) {% endif %}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entry ladder -->
+  <h4>Entry Ladder</h4>
+  <div class="list-group mb-4">
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <div class="fw-600">E0: Histogram contracting</div>
+        <div class="small text-muted">abs(hist) contracting for two consecutive bars</div>
+      </div>
+      <div class="text-end">
+        <div class="fw-600 {% if diagnostics.E0_histogram_contracting %}text-success{% else %}text-muted{% endif %}">
+          {% if diagnostics.E0_histogram_contracting %}MET{% else %}NOT MET{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <div class="fw-600">E1: MACD &gt; Signal</div>
+        <div class="small text-muted">MACD {{ "{:.2f}"|format(result.macd) }} vs Signal {{ "{:.2f}"|format(result.signal) }}</div>
+      </div>
+      <div class="text-end">
+        {% if diagnostics.E1_macd_above_signal %}
+        <div class="fw-600 text-success">MET</div>
+        <div class="small text-muted">Delta {{ "{:.2f}"|format(result.macd - result.signal) }}</div>
+        {% else %}
+        <div class="fw-600 text-danger">BLOCKED</div>
+        <div class="small text-muted">Need MACD +{{ "{:.2f}"|format(result.signal - result.macd) }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <div class="fw-600">E2: RSI &gt; 40</div>
+        <div class="small text-muted">RSI {{ "{:.2f}"|format(result.rsi) }}</div>
+      </div>
+      <div class="text-end">
+        {% if diagnostics.E2_rsi_gt_40 %}
+        <div class="fw-600 text-success">MET</div>
+        {% else %}
+        <div class="fw-600 text-danger">BLOCKED</div>
+        <div class="small text-muted">RSI needs +{{ "{:.2f}"|format(40 - result.rsi) }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <div class="fw-600">E3: Above most recent gap reclaim</div>
+        <div class="small text-muted">{% if result.gap_level %}Reclaim level ${{ "{:.2f}"|format(result.gap_level) }}{% else %}No gap in lookback{% endif %}</div>
+      </div>
+      <div class="text-end">
+        {% if diagnostics.E3_above_gap_reclaim %}
+        <div class="fw-600 text-success">MET</div>
+        {% else %}
+        <div class="fw-600 text-danger">BLOCKED</div>
+        <div class="small text-muted">{{ "{:.2f}"|format(result.gap_level - result.latest.close) }} below reclaim</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Exit triggers -->
+  <h4>Exit Triggers</h4>
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card p-3 text-center">
+        <div class="fw-600">X1: MACD &lt; Signal</div>
+        <div class="mt-2 {% if diagnostics.X1_macd_below_signal %}text-danger{% else %}text-muted{% endif %}">
+          {% if diagnostics.X1_macd_below_signal %}FIRING{% else %}Not firing{% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 text-center">
+        <div class="fw-600">X2: Below Stop</div>
+        <div class="mt-2 text-muted">Set stop to evaluate</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 text-center">
+        <div class="fw-600">X3: Fresh gap down held</div>
+        <div class="mt-2 {% if diagnostics.X3_fresh_gap_held %}text-danger{% else %}text-muted{% endif %}">
+          {% if diagnostics.X3_fresh_gap_held %}FIRING{% else %}Not firing{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Position tracker -->
+  <h4>Position Tracker</h4>
+  <div class="card p-3 mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-3"><input id="entry" class="form-control" placeholder="Entry price"></div>
+      <div class="col-md-2"><input id="shares" class="form-control" placeholder="Shares"></div>
+      <div class="col-md-2"><input id="stop" class="form-control" placeholder="Stop price"></div>
+      <div class="col-md-2"><input id="target" class="form-control" placeholder="Target price"></div>
+      <div class="col-md-3 text-end">
+        <button id="savePos" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+
+    <div class="mt-3" id="posStats">
+      <div class="small text-muted">Enter position details to see P/L and risk metrics.</div>
+    </div>
+  </div>
+
+  <!-- Raw values -->
+  <h4>Computed Values</h4>
+  <table class="table table-sm mb-3">
+    <tbody>
+      <tr><td>MACD</td><td>{{ "{:.4f}"|format(result.macd) }}</td></tr>
+      <tr><td>Signal</td><td>{{ "{:.4f}"|format(result.signal) }}</td></tr>
+      <tr><td>Histogram</td><td>{{ "{:.4f}"|format(result.hist) }}</td></tr>
+      <tr><td>RSI(14)</td><td>{{ "{:.2f}"|format(result.rsi) }}</td></tr>
+      <tr><td>SMA50</td><td>{{ "{:.2f}"|format(result.sma50) }}</td></tr>
+      <tr><td>SMA200</td><td>{{ "{:.2f}"|format(result.sma200) }}</td></tr>
+      <tr><td>Last gap reclaim</td><td>{% if result.gap_level %}${{ "{:.2f}"|format(result.gap_level) }}{% else %}—{% endif %}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="small text-muted">Signals are computed on daily closes and are lagging by design. Informational purposes only. Not financial advice.</div>
+
+  <script>
+  (function(){
+    const price = {{ result.latest.close }};
+    const entryIn = document.getElementById('entry');
+    const sharesIn = document.getElementById('shares');
+    const stopIn = document.getElementById('stop');
+    const targetIn = document.getElementById('target');
+    const saveBtn = document.getElementById('savePos');
+    const stats = document.getElementById('posStats');
+
+    function load() {
+      entryIn.value = localStorage.getItem('soxl_entry') || '';
+      sharesIn.value = localStorage.getItem('soxl_shares') || '';
+      stopIn.value = localStorage.getItem('soxl_stop') || '';
+      targetIn.value = localStorage.getItem('soxl_target') || '';
+      render();
+    }
+    function render() {
+      const entry = parseFloat(entryIn.value);
+      const shares = parseFloat(sharesIn.value);
+      const stop = parseFloat(stopIn.value);
+      const target = parseFloat(targetIn.value);
+      if (!isFinite(entry) || !isFinite(shares)) { stats.innerHTML = '<div class="small text-muted">Enter entry and shares to compute.</div>'; return; }
+      const pl = (price - entry) * shares;
+      const plPct = (price/entry -1) * 100;
+      const risk = isFinite(stop) ? (entry - stop) * shares : null;
+      const pctToTarget = isFinite(target) ? (target/price -1) * 100 : null;
+      const rr = (isFinite(pctToTarget) && isFinite(risk) && risk!==0) ? ((target-entry)*shares)/Math.abs(risk) : null;
+      let html = `<div>Unrealized P/L: <strong>$${pl.toFixed(2)}</strong> (${plPct.toFixed(2)}%)</div>`;
+      if (isFinite(risk)) html += `<div>Dollar risk to stop: <strong>$${risk.toFixed(2)}</strong></div>`;
+      if (isFinite(pctToTarget)) html += `<div>Percent to target: <strong>${pctToTarget.toFixed(2)}%</strong></div>`;
+      if (rr) html += `<div>Reward:risk: <strong>${rr.toFixed(2)}</strong></div>`;
+      if (!isFinite(stop)) html += `<div class="text-danger small">Warning: No stop set.</div>`;
+      stats.innerHTML = html;
+    }
+    saveBtn.addEventListener('click', ()=>{
+      localStorage.setItem('soxl_entry', entryIn.value);
+      localStorage.setItem('soxl_shares', sharesIn.value);
+      localStorage.setItem('soxl_stop', stopIn.value);
+      localStorage.setItem('soxl_target', targetIn.value);
+      render();
+    });
+    [entryIn, sharesIn, stopIn, targetIn].forEach(i=>i.addEventListener('input', render));
+    load();
+  })();
+  </script>
+
+  {% else %}
+  <div class="alert alert-secondary">No data to show.</div>
+  {% endif %}
+
+</div>
+{% endblock %}
