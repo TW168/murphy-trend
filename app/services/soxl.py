@@ -44,6 +44,9 @@ def fetch_soxl_data() -> Tuple[pd.DataFrame, bool]:
         df = yf.download(SOXL_TICKER, period=f"{FETCH_LOOKBACK}d", auto_adjust=True, progress=False)
         if df.empty:
             raise RuntimeError("yfinance returned no data")
+        # Flatten MultiIndex columns when yfinance returns ticker-level frames.
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
         # Ensure columns: Open, High, Low, Close, Volume
         df = df[["Open", "High", "Low", "Close", "Volume"]].dropna()
         _cache["df"] = df.copy()
