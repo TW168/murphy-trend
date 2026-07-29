@@ -38,27 +38,44 @@ document.querySelectorAll('input[name="ticker"]').forEach(input => {
 
 // ---- Analyze form submit feedback ----
 document.querySelectorAll('form[action="/analyze"]').forEach(form => {
-  form.addEventListener('submit', () => {
-    const button = form.querySelector('button[type="submit"]');
-    if (!button || button.disabled) {
-      return;
-    }
+  // Use the submit event's `submitter` when available and
+  // fall back to the first submit button in the form.
+  form.addEventListener('submit', (evt) => {
+    const button = (evt && evt.submitter) || form.querySelector('button[type="submit"]') || form.querySelector('input[type="submit"]');
+    if (!button || button.disabled) return;
 
-    const opensNewTab = form.target === '_blank' || form.getAttribute('target') === '_blank';
+    // Determine whether this submission will open a new tab/window.
+    const btnTarget = (button.getAttribute && button.getAttribute('formtarget')) || (button.formtarget || '');
+    const formTargetAttr = form.getAttribute && form.getAttribute('target');
+    const opensNewTab = String(btnTarget).toLowerCase() === '_blank' || String(formTargetAttr).toLowerCase() === '_blank' || String(form.target || '').toLowerCase() === '_blank';
+
     button.dataset.originalHtml = button.innerHTML;
 
     if (opensNewTab) {
+      // For _blank submissions show a short 'Opening...' state but don't disable
+      // the button (some browsers may keep the page active when the new tab opens)
       button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Opening...';
+      // Revert after a short timeout in case the new tab is blocked or the
+      // opener stays on this page.
       window.setTimeout(() => {
-        if (button.dataset.originalHtml) {
-          button.innerHTML = button.dataset.originalHtml;
-        }
-      }, 1500);
+        if (button.dataset.originalHtml) button.innerHTML = button.dataset.originalHtml;
+      }, 2000);
       return;
     }
 
+    // Normal same-window submission: disable and show loading state.
     button.disabled = true;
     button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...';
+
+    // Safety: if the submission is prevented by a popup blocker or other
+    // script and the page remains active, ensure the button is re-enabled
+    // after a reasonable timeout so it doesn't stay stuck forever.
+    window.setTimeout(() => {
+      if (button && button.disabled) {
+        button.disabled = false;
+        if (button.dataset.originalHtml) button.innerHTML = button.dataset.originalHtml;
+      }
+    }, 10000);
   });
 });
 
