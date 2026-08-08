@@ -125,95 +125,6 @@
   </div>
 </section>
 
-<!-- Valuation Measures -->
-{% if result.valuation %}
-<section class="py-3">
-  <div class="container-fluid px-4 px-lg-5">
-    <h5 class="fw-600 mb-3">Valuation Measures &amp; Financial Highlights</h5>
-    <div class="row g-3">
-      <!-- Valuation Measures -->
-      <div class="col-12 col-lg-4">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-header bg-transparent border-bottom fw-600 small text-uppercase text-muted py-2">Valuation Measures</div>
-          <div class="card-body p-0">
-            <table class="table table-sm table-hover mb-0">
-              <tbody>
-                {% set vm = [
-                  ("Market Cap", result.valuation.market_cap),
-                  ("Enterprise Value", result.valuation.enterprise_value),
-                  ("Trailing P/E", result.valuation.trailing_pe),
-                  ("Forward P/E", result.valuation.forward_pe),
-                  ("PEG Ratio (5yr)", result.valuation.peg_ratio),
-                  ("Price/Sales (ttm)", result.valuation.price_to_sales),
-                  ("Price/Book (mrq)", result.valuation.price_to_book),
-                  ("EV/Revenue", result.valuation.ev_to_revenue),
-                  ("EV/EBITDA", result.valuation.ev_to_ebitda),
-                ] %}
-                {% for label, val in vm %}
-                <tr>
-                  <td class="text-muted small ps-3">{{ label }}</td>
-                  <td class="text-end fw-500 pe-3">{{ val if val else "—" }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <!-- Profitability & Income -->
-      <div class="col-12 col-lg-4">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-header bg-transparent border-bottom fw-600 small text-uppercase text-muted py-2">Profitability &amp; Income</div>
-          <div class="card-body p-0">
-            <table class="table table-sm table-hover mb-0">
-              <tbody>
-                {% set pi = [
-                  ("Profit Margin", result.valuation.profit_margin),
-                  ("Return on Assets (ttm)", result.valuation.return_on_assets),
-                  ("Return on Equity (ttm)", result.valuation.return_on_equity),
-                  ("Revenue (ttm)", result.valuation.revenue_ttm),
-                  ("Net Income (ttm)", result.valuation.net_income_ttm),
-                  ("Diluted EPS (ttm)", result.valuation.diluted_eps),
-                ] %}
-                {% for label, val in pi %}
-                <tr>
-                  <td class="text-muted small ps-3">{{ label }}</td>
-                  <td class="text-end fw-500 pe-3">{{ val if val else "—" }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <!-- Balance Sheet & Cash Flow -->
-      <div class="col-12 col-lg-4">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-header bg-transparent border-bottom fw-600 small text-uppercase text-muted py-2">Balance Sheet &amp; Cash Flow</div>
-          <div class="card-body p-0">
-            <table class="table table-sm table-hover mb-0">
-              <tbody>
-                {% set bs = [
-                  ("Total Cash (mrq)", result.valuation.total_cash),
-                  ("Total Debt/Equity (mrq)", result.valuation.debt_to_equity),
-                  ("Levered Free Cash Flow (ttm)", result.valuation.levered_fcf),
-                ] %}
-                {% for label, val in bs %}
-                <tr>
-                  <td class="text-muted small ps-3">{{ label }}</td>
-                  <td class="text-end fw-500 pe-3">{{ val if val else "—" }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-{% endif %}
-
 <!-- Chart -->
 <section class="py-3">
   <div class="container-fluid px-4 px-lg-5">
@@ -433,6 +344,102 @@
     </div>
   </div>
 </section>
+
+<!-- Valuation Measures & Financial Highlights -->
+{% if result.valuation %}
+<section class="py-3 pb-5">
+  <div class="container-fluid px-4 px-lg-5">
+    <h5 class="fw-600 mb-3"><i class="bi bi-bank me-2 text-primary"></i>Valuation Measures &amp; Financial Highlights</h5>
+    <div class="row g-4">
+
+      <!-- Valuation Measures -->
+      <div class="col-12 col-lg-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header fw-600">
+            <i class="bi bi-graph-up me-2 text-primary"></i>Valuation Measures
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-sm table-hover mb-0">
+              <tbody>
+                {% for label, val in [
+                  ("Market Cap", result.valuation.market_cap),
+                  ("Enterprise Value", result.valuation.enterprise_value),
+                  ("Trailing P/E", result.valuation.trailing_pe),
+                  ("Forward P/E", result.valuation.forward_pe),
+                  ("PEG Ratio (5yr expected)", result.valuation.peg_ratio),
+                  ("Price/Sales (ttm)", result.valuation.price_to_sales),
+                  ("Price/Book (mrq)", result.valuation.price_to_book),
+                  ("EV/Revenue", result.valuation.ev_to_revenue),
+                  ("EV/EBITDA", result.valuation.ev_to_ebitda),
+                ] %}
+                <tr>
+                  <td class="text-muted small ps-3 py-2">{{ label }}</td>
+                  <td class="text-end fw-500 pe-3 py-2">{{ val if val else "—" }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profitability & Income -->
+      <div class="col-12 col-lg-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header fw-600">
+            <i class="bi bi-cash-coin me-2 text-primary"></i>Profitability &amp; Income
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-sm table-hover mb-0">
+              <tbody>
+                {% for label, val in [
+                  ("Profit Margin", result.valuation.profit_margin),
+                  ("Return on Assets (ttm)", result.valuation.return_on_assets),
+                  ("Return on Equity (ttm)", result.valuation.return_on_equity),
+                  ("Revenue (ttm)", result.valuation.revenue_ttm),
+                  ("Net Income (ttm)", result.valuation.net_income_ttm),
+                  ("Diluted EPS (ttm)", result.valuation.diluted_eps),
+                ] %}
+                <tr>
+                  <td class="text-muted small ps-3 py-2">{{ label }}</td>
+                  <td class="text-end fw-500 pe-3 py-2">{{ val if val else "—" }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance Sheet & Cash Flow -->
+      <div class="col-12 col-lg-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header fw-600">
+            <i class="bi bi-bar-chart-steps me-2 text-primary"></i>Balance Sheet &amp; Cash Flow
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-sm table-hover mb-0">
+              <tbody>
+                {% for label, val in [
+                  ("Total Cash (mrq)", result.valuation.total_cash),
+                  ("Total Debt/Equity (mrq)", result.valuation.debt_to_equity),
+                  ("Levered Free Cash Flow (ttm)", result.valuation.levered_fcf),
+                ] %}
+                <tr>
+                  <td class="text-muted small ps-3 py-2">{{ label }}</td>
+                  <td class="text-end fw-500 pe-3 py-2">{{ val if val else "—" }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endif %}
 
 {% endif %}
 {% endblock %}
